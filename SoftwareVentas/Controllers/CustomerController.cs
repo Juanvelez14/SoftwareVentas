@@ -3,90 +3,85 @@ using Microsoft.EntityFrameworkCore;
 using SoftwareVentas.Data;
 using SoftwareVentas.Data.Entities;
 
-
 // Here we define the controller
 namespace SoftwareVentas.Controllers
 {
-    public class ProductsController : Controller
+    public class CustomersController : Controller
     {
         private readonly DataContext _context;
 
-        public ProductsController(DataContext context)
+        public CustomersController(DataContext context)
         {
             _context = context;
         }
 
-        // Here we get the list of all products in the database
+        // Here we do the read method
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            List<Product> products = await _context.Products.ToListAsync();
-            return View(products);
+            List<Customers> customers = await _context.Customers.ToListAsync();
+            return View(customers);
         }
 
-
-        // displays a form to create a product
+        // Here we make the form to create a new client
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // Check if the created product is valid
+        // Here we check if the model is valid
         [HttpPost]
-        public async Task<IActionResult> Create(Product product)
+        public async Task<IActionResult> Create(Customers customer)
         {
             if (!ModelState.IsValid)
             {
-                return View(product);
+                return View(customer);
             }
 
-            await _context.Products.AddAsync(product);
+            await _context.Customers.AddAsync(customer);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-
-        // Search for the product by its ID and pass it to the view for editing
+        //Here we look for the client id so we can move on to the edit view
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var customer = await _context.Customers.FindAsync(id);
+            if (customer == null)
             {
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(product);
+            return View(customer);
         }
 
-
-        // Here you use the update to modify the product that already exists
+        //Here we verify that it is valid to be able to perform the update
         [HttpPost]
-        public async Task<IActionResult> Edit(Product product)
+        public async Task<IActionResult> Edit(Customers customer)
         {
             if (!ModelState.IsValid)
             {
-                return View(product);
+                return View(customer);
             }
 
-            _context.Products.Update(product);
+            _context.Customers.Update(customer);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-
-        // Here you find a product by id and delete it
+        // Here what we do is find a client by the id and delete it
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var customer = await _context.Customers.FindAsync(id);
+            if (customer == null)
             {
                 return RedirectToAction(nameof(Index));
             }
 
-            _context.Products.Remove(product);
+            _context.Customers.Remove(customer);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
