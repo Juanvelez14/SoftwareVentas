@@ -10,9 +10,9 @@ namespace SoftwareVentas.Data.Entities
         [Required(ErrorMessage = "El campo '{0}' es requerido.")]
         public string Name { get; set; } = null!;
         [Required(ErrorMessage = "El campo '{0}' es requerido.")]
-
         public decimal Price { get; set; }
-        
-
+        [Required(ErrorMessage = "El campo '{0}' es requerido.")]
+        public int Stock { get; set; }
+        public decimal Descuento { get; set; }
     }
 }
