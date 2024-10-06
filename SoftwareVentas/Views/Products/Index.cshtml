@@ -1,0 +1,28 @@
+﻿@model List<SoftwareVentas.Data.Entities.Product>
+
+@{
+    ViewData["Title"] = "Products";
+}
+
+<h1>Products</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Stock</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (Product product in Model)
+        {
+            
+        }
+    </tbody>
+
+    <tfoot>
+
+    </tfoot>
+</table>
