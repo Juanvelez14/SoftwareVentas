@@ -19,7 +19,7 @@ namespace SoftwareVentas.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            List<Customers> customers = await _context.Customers.ToListAsync();
+            List<Customer> customers = await _context.Customers.ToListAsync();
             return View(customers);
         }
 
@@ -32,7 +32,7 @@ namespace SoftwareVentas.Controllers
 
         // Here we check if the model is valid
         [HttpPost]
-        public async Task<IActionResult> Create(Customers customer)
+        public async Task<IActionResult> Create(Customer customer)
         {
             if (!ModelState.IsValid)
             {
@@ -59,7 +59,7 @@ namespace SoftwareVentas.Controllers
 
         //Here we verify that it is valid to be able to perform the update
         [HttpPost]
-        public async Task<IActionResult> Edit(Customers customer)
+        public async Task<IActionResult> Edit(Customer customer)
         {
             if (!ModelState.IsValid)
             {
