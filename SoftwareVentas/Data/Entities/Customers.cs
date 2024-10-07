@@ -4,7 +4,7 @@ namespace SoftwareVentas.Data.Entities
     public class Customers
     {
         [Key]
-        public int Id { get; set; }
+        public int idCostumer { get; set; }
         [MaxLength(100, ErrorMessage = "El campo '{0}' debe tener maximo '{1}' caracteres")]
         [Required(ErrorMessage = "El campo '{0}' es requerido.")]
         public string Name { get; set; } = null!;
@@ -12,7 +12,7 @@ namespace SoftwareVentas.Data.Entities
         [MaxLength(255, ErrorMessage = "El campo '{0}' debe tener maximo '{1}' caracteres")]
         public string Adress { get; set; } = null!;
         [MaxLength(20, ErrorMessage = "El campo '{0}' debe tener maximo '{1}' caracteres")]
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; } 
 
 
     }
