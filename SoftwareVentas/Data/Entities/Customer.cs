@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 namespace SoftwareVentas.Data.Entities
 {
-    public class Customers
+    public class Customer
     {
         [Key]
         public int idCostumer { get; set; }

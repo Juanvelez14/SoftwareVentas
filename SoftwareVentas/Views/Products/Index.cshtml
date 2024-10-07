@@ -1,0 +1,29 @@
+﻿@model IEnumerable<SoftwareVentas.Data.Entities.Product>
+
+@{
+ViewData["Title"] = "Lista de Productos";
+}
+
+<h1>Lista de Productos</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Descuento</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+    {
+        <tr>
+            <td>@product.Name</td>
+            <td>@product.Price</td>
+            <td>@product.Stock</td>
+            <td>@product.Discount</td>
+        </tr>
+    }
+    </tbody>
+</table>
