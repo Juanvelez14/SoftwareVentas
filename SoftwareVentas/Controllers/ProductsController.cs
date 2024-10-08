@@ -36,16 +36,26 @@ namespace SoftwareVentas.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Product product)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return View(product);
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values.SelectMany(v => v.Errors);
+                    return View(product);
+
+                }
+                await _context.Products.AddAsync(product);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+                //return RedirectToAction(nameof(Index));
             }
 
-            await _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
-
 
         // Search for the product by its ID and pass it to the view for editing
         [HttpGet]

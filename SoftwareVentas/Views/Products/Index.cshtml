@@ -5,14 +5,16 @@ ViewData["Title"] = "Lista de Productos";
 }
 
 <h1>Lista de Productos</h1>
+<a class="btn btn-info" asp-action="Create">+ New Product</a>
 
-<table class="table">
+<table class="table table-bordered mt-3">
     <thead>
         <tr>
             <th>Nombre</th>
             <th>Precio</th>
             <th>Stock</th>
             <th>Descuento</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -23,6 +25,10 @@ ViewData["Title"] = "Lista de Productos";
             <td>@product.Price</td>
             <td>@product.Stock</td>
             <td>@product.Discount</td>
+            <td>
+                <a class="btn btn-warning" asp-action="Edit" asp-route-id="@product.idProduct">Edit</a>
+                <a class="btn btn-danger" asp-action="Delete" asp-route-id="@product.idProduct">Delete</a>
+            </td>
         </tr>
     }
     </tbody>

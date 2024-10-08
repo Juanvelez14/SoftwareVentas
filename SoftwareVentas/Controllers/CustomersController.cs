@@ -34,14 +34,23 @@ namespace SoftwareVentas.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Customer customer)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return View(customer);
-            }
+                if (!ModelState.IsValid)
+                {
+                    return View(customer);
+                }
 
-            await _context.Customers.AddAsync(customer);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                await _context.Customers.AddAsync(customer);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+                //return RedirectToAction(nameof(Index));
+            }
         }
 
         //Here we look for the client id so we can move on to the edit view
