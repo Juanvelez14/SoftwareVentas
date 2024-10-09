@@ -54,50 +54,30 @@ namespace SoftwareVentas.Controllers
         }
 
         //Here we look for the client id so we can move on to the edit view
-        [HttpPost]
-        public async Task<IActionResult> Edit(Customer customer)
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
         {
-            try
+            var customer = await _context.Customers.FindAsync(id);
+            if (customer == null)
             {
-                if (!ModelState.IsValid)
-                {
-                    return View(customer);
-                }
-                
-                _context.Customers.Update(customer);
-
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
-                               
-            }
-            catch (Exception ex)
-            {
-               // Console.WriteLine(ex.Message);
-                //throw;
                 return RedirectToAction(nameof(Index));
             }
+
+            return View(customer);
         }
 
         //Here we verify that it is valid to be able to perform the update
-        [HttpGet]
-        public async Task<IActionResult> Edit([FromRoute] int id)
+        [HttpPost]
+        public async Task<IActionResult> Edit(Customer customer)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                Customer? customer= await _context.Customers.FirstOrDefaultAsync(a => a.idCustomer == id);
-
-
                 return View(customer);
-
-
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-                //return RedirectToAction(nameof(Index));
-            }
+
+            _context.Customers.Update(customer);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // Here what we do is find a client by the id and delete it
