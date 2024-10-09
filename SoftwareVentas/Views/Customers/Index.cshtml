@@ -25,7 +25,9 @@
                 <td>@customer.mainPhone</td>
                 <td>
                     <a class="btn btn-warning" asp-action="Edit" asp-route-id="@customer.idCustomer">Edit</a>
-                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@customer.idCustomer">Delete</a>
+                    <form asp-action="Delete" asp-route-id="@customer.idCustomer" method="POST" style="display: contents;">
+                        <button class="btn btn-danger btnDelete">Eliminar</button>
+                    </form>
                 </td>
             </tr>
         }

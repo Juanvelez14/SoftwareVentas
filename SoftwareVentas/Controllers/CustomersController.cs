@@ -82,17 +82,22 @@ namespace SoftwareVentas.Controllers
 
         // Here what we do is find a client by the id and delete it
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer == null)
+            try
+            {
+                Customer? customer = await _context.Customers.FirstOrDefaultAsync(a => a.idCustomer == id);
+
+                _context.Customers.Remove(customer);
+
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
             {
                 return RedirectToAction(nameof(Index));
             }
-
-            _context.Customers.Remove(customer);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
     }
 }

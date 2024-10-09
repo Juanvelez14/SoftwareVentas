@@ -15,7 +15,20 @@ namespace SoftwareVentas.Data
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<Sale> Sales { get; set; }
-        public DbSet<SaleDetail> SaleDetails { get; set; }
         public DbSet<CustomerPhone> CustomerPhones { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Discount)
+                .HasColumnType("decimal(18, 2)"); // Ajusta según tus necesidades
+                
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Price)
+                .HasColumnType("decimal(18, 2)"); // Ajusta según tus necesidades
+
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }
