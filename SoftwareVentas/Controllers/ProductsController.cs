@@ -57,33 +57,53 @@ namespace SoftwareVentas.Controllers
 
         }
 
-        // Search for the product by its ID and pass it to the view for editing
+        //Here we look for the client id so we can move on to the edit view
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit([FromRoute] int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            try
             {
-                return RedirectToAction(nameof(Index));
-            }
+                Product? product = await _context.Products.FirstOrDefaultAsync(a => a.idProduct == id);
 
-            return View(product);
+
+                return View(product);
+
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+                //return RedirectToAction(nameof(Index));
+            }
         }
 
-
-        // Here you use the update to modify the product that already exists
+        //Here we verify that it is valid to be able to perform the update
         [HttpPost]
         public async Task<IActionResult> Edit(Product product)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return View(product);
-            }
+                if (!ModelState.IsValid)
+                {
+                    return View(product);
+                }
 
-            _context.Products.Update(product);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                _context.Products.Update(product);
+
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+
+            }
+            catch (Exception ex)
+            {
+                // Console.WriteLine(ex.Message);
+                //throw;
+                return RedirectToAction(nameof(Index));
+            }
         }
+
 
 
         // Here you find a product by id and delete it
