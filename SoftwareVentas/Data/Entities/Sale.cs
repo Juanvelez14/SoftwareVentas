@@ -15,5 +15,7 @@ namespace SoftwareVentas.Data.Entities
 
         [Required(ErrorMessage = "El campo '{0}' es requerido.")]
         public int EmployeeId { get; set; }
+
+
     }
 }

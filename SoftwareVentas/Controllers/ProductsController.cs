@@ -88,17 +88,22 @@ namespace SoftwareVentas.Controllers
 
         // Here you find a product by id and delete it
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            try
+            {
+                Product? product = await _context.Products.FirstOrDefaultAsync(a => a.idProduct == id);
+
+                _context.Products.Remove(product);
+
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
             {
                 return RedirectToAction(nameof(Index));
             }
-
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
     }
 }
