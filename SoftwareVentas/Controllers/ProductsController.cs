@@ -78,6 +78,7 @@ namespace SoftwareVentas.Controllers
             }
         }
 
+
         //Here we verify that it is valid to be able to perform the update
         [HttpPost]
         public async Task<IActionResult> Edit(Product product)
@@ -122,6 +123,8 @@ namespace SoftwareVentas.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
+                throw;
                 return RedirectToAction(nameof(Index));
             }
         }

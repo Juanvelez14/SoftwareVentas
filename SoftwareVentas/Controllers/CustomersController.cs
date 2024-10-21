@@ -116,6 +116,8 @@ namespace SoftwareVentas.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
+                throw;
                 return RedirectToAction(nameof(Index));
             }
         }
