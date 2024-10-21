@@ -1,8 +1,40 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Menú de Customers and Products";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Bienvenido</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Estilos CSS para los botones -->
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        padding: 20px;
+        text-align: center;
+    }
+
+    nav {
+        margin: 20px 0;
+    }
+
+    .menu-button {
+        text-decoration: none;
+        color: white;
+        padding: 10px 20px;
+        margin: 10px;
+        border-radius: 5px;
+        background-color: #007bff;
+        border: none;
+        font-size: 16px;
+        display: inline-block;
+        transition: background-color 0.3s ease;
+    }
+
+    .menu-button:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<!-- Menú con botones -->
+<nav>
+    <a href="@Url.Action("Index", "Customers")" class="menu-button">Customers</a>
+    <a href="@Url.Action("Index", "Products")" class="menu-button">Products</a>
+</nav>
