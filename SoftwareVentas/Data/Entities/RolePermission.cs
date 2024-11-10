@@ -4,13 +4,10 @@ namespace SoftwareVentas.Data.Entities
 {
     public class RolePermission
     {
-        [Key]
-        public int Id { get; set; }
-
-        [Required(ErrorMessage = "El campo '{0}' es requerido.")]
         public int RoleId { get; set; }
+        public Role Role { get; set; }
 
-        [Required(ErrorMessage = "El campo '{0}' es requerido.")]
         public int PermissionId { get; set; }
+        public Permission Permission { get; set; }
     }
 }

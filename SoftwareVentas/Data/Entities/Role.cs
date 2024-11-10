@@ -6,8 +6,12 @@ namespace SoftwareVentas.Data.Entities
     {
         [Key]
         public int Id { get; set; }
-        [MaxLength(50, ErrorMessage = "El campo '{0}' debe tener un máximo de '{1}' caracteres.")]
+
+        [Display(Name = "Rol")]
+        [MaxLength(64, ErrorMessage = "El campo '{0}' debe tener un máximo de '{1}' caracteres.")]
         [Required(ErrorMessage = "El campo '{0}' es requerido.")]
         public string RoleName { get; set; } = null!;
+
+        public ICollection<RolePermission> RolePermissions { get; set; }
     }
 }

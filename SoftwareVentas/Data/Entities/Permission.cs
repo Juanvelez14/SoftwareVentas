@@ -7,8 +7,21 @@ namespace SoftwareVentas.Data.Entities
         [Key]
         public int Id { get; set; }
 
-        [MaxLength(100, ErrorMessage = "El campo '{0}' debe tener un máximo de '{1}' caracteres.")]
+        [Display(Name = "Permiso")]
+        [MaxLength(64, ErrorMessage = "El campo '{0}' debe tener un máximo de '{1}' caracteres.")]
         [Required(ErrorMessage = "El campo '{0}' es requerido.")]
-        public string PermissionDescription { get; set; } = null!;
+        public string Name { get; set; } = null!;
+
+        [Display(Name = "Descripcion")]
+        [MaxLength(512, ErrorMessage = "El campo '{0}' debe tener un máximo de '{1}' caracteres.")]
+        [Required(ErrorMessage = "El campo '{0}' es requerido.")]
+        public string Descripcion { get; set; } = null!;
+
+        [Display(Name = "Modulo")]
+        [MaxLength(64, ErrorMessage = "El campo '{0}' debe tener un máximo de '{1}' caracteres.")]
+        [Required(ErrorMessage = "El campo '{0}' es requerido.")]
+        public string Module { get; set; } = null!;
+
+        public ICollection<RolePermission> RolePermissions { get; set; }
     }
 }
