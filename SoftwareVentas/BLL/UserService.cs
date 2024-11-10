@@ -7,6 +7,7 @@ namespace SoftwareVentas.BLL
 {
     public interface IUsersService
     {
+        public Task<List<User>> GetAllUsersAsync();
         public Task<IdentityResult> AddUserAsync(User user, string password);
         public Task<IdentityResult> ConfirmEmail(User user, string token);
         public Task<string> GenerateEmailConfirmationTokenAsync(User user);
@@ -26,6 +27,10 @@ namespace SoftwareVentas.BLL
             _context = context;
             _signInManager = signInManager;
             _userManager = userManager;
+        }
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            return await _context.Users.ToListAsync();
         }
 
         private readonly SignInManager<User> _signInManager;

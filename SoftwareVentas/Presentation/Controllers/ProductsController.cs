@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SoftwareVentas.BLL;
 using SoftwareVentas.Data;
@@ -8,6 +9,7 @@ using SoftwareVentas.Data.Entities;
 // Here we define the controller
 namespace SoftwareVentas.Presentation.Controllers
 {
+    [Authorize]
     public class ProductsController : Controller
     {
         private readonly ProductService _productService;
@@ -17,6 +19,7 @@ namespace SoftwareVentas.Presentation.Controllers
             _productService = productService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
