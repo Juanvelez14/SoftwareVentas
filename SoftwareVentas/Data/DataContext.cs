@@ -17,8 +17,9 @@ namespace SoftwareVentas.Data
         public DbSet<RolePermission> RolePermissions { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<CustomerPhone> CustomerPhones { get; set; }
+        public DbSet<PrivateBlogRole> privateBlogRoles { get; set; }
+        public object Sections { get; internal set; }
 
-   
         protected override void OnModelCreating(ModelBuilder builder)
         {
             ConfigureKeys(builder);
@@ -42,11 +43,20 @@ namespace SoftwareVentas.Data
         }
 
         private void ConfigureIndexes(ModelBuilder builder)
+
         {
-            builder.Entity<Role>().HasIndex(s => s.RoleName)
+            // roles 
+            builder.Entity<PrivateBlogRole>().HasIndex(p => p.Name)
+                                            .IsUnique();
+            //sections
+            builder.Entity<Role>().HasIndex(r => r.RoleName)
                                             .IsUnique();
 
+            //user
             builder.Entity<User>().HasIndex(u => u.Document)
+                                            .IsUnique();
+
+            builder.Entity<Permission>().HasIndex(u => u.Name)
                                             .IsUnique();
         }
     }

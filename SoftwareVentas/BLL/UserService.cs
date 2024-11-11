@@ -14,7 +14,7 @@ namespace SoftwareVentas.BLL
         public Task<User> GetUserAsync(string email);
         public Task<SignInResult> LoginAsync(string email, string password);
         public Task LogoutAsync();
-
+        Task ConfirmEmailAsync(User user, string token);
     }
     public class UserService : IUsersService
     {

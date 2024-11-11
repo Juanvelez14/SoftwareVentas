@@ -24,9 +24,10 @@ namespace SoftwareVentas.Data.Entities
         public string LastName { get; set; } = null!;
 
         public string FullName => $"{FirstName} {LastName}";
-        
+
         public int RoleId { get; set; }
 
+        public PrivateBlogRole PrivateBlogRole { get; set; }
         public Role Role { get; set; }
 
     }
