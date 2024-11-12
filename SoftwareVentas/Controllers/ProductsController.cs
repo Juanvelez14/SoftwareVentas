@@ -13,8 +13,8 @@ using SoftwareVentas.Requests;
 // Here we define the controller
 namespace SoftwareVentas.Controllers
 {
-    
-    public class ProductsController : Controller
+	[Authorize]
+	public class ProductsController : Controller
     {
         private readonly IProductsService _productService;
         private readonly INotyfService _notifyService;
@@ -25,7 +25,10 @@ namespace SoftwareVentas.Controllers
             _notifyService = notifyService;
         }
 
-        [HttpGet]
+		[AllowAnonymous]
+		// Ver la lista de productos, accesible para empleados y administradores
+		[Authorize(Policy = "EmployeeOnly")]
+		[HttpGet]
         public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
                                                [FromQuery] int? Page,
                                                [FromQuery] string? Filter)
@@ -43,14 +46,16 @@ namespace SoftwareVentas.Controllers
             return View(response.Result);
         }
 
-        [HttpGet]
+		[Authorize(Policy = "AdminOnly")]
+		[HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Product product)
+		[Authorize(Policy = "AdminOnly")]
+		public async Task<IActionResult> Create(Product product)
         {
             try
             {
@@ -77,7 +82,8 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-        [HttpGet]
+		[Authorize(Policy = "AdminOnly")]
+		[HttpGet]
         public async Task<IActionResult> Edit([FromRoute] int id)
         {
             Response<Product> response = await _productService.GetOneAsync(id);
@@ -93,7 +99,8 @@ namespace SoftwareVentas.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Product product)
+		[Authorize(Policy = "AdminOnly")]
+		public async Task<IActionResult> Edit(Product product)
         {
             try
             {
@@ -121,7 +128,8 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-        [HttpPost]
+		[Authorize(Policy = "AdminOnly")]
+		[HttpPost]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             Response<Product> response = await _productService.DeleteteAsync(id);

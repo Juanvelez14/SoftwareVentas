@@ -12,7 +12,8 @@ using SoftwareVentas.Requests;
 // Here we define the controller
 namespace SoftwareVentas.Controllers
 {
-    public class CustomersController : Controller
+	[Authorize]
+	public class CustomersController : Controller
     {
         private readonly ICustomerService _customerService;
         private readonly INotyfService _notifyService;
@@ -23,8 +24,8 @@ namespace SoftwareVentas.Controllers
             _notifyService = notifyService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
+		[Authorize(Policy = "EmployeeOnly")]
+		public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
                                                [FromQuery] int? Page,
                                                [FromQuery] string? Filter)
         {
@@ -41,14 +42,16 @@ namespace SoftwareVentas.Controllers
             return View(response.Result);
         }
 
-        [HttpGet]
-        public IActionResult Create()
+		[Authorize(Policy = "AdminOnly")]
+		public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Customer customer)
+		[Authorize(Policy = "AdminOnly")]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Create(Customer customer)
         {
             try
             {
@@ -75,8 +78,8 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Edit([FromRoute] int id)
+		[Authorize(Policy = "AdminOnly")]
+		public async Task<IActionResult> Edit([FromRoute] int id)
         {
             Response<Customer> response = await _customerService.GetOneAsync(id);
 
@@ -91,7 +94,9 @@ namespace SoftwareVentas.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Customer customer)
+		[Authorize(Policy = "AdminOnly")]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Edit(Customer customer)
         {
             try
             {
@@ -119,8 +124,8 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Delete([FromRoute] int id)
+		[Authorize(Policy = "AdminOnly")]
+		public async Task<IActionResult> Delete([FromRoute] int id)
         {
             Response<Customer> response = await _customerService.DeleteteAsync(id);
 

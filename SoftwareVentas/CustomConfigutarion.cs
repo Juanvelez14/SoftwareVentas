@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using SoftwareVentas.Data;
 using SoftwareVentas.Data.Entities;
 using SoftwareVentas.Helpers;
+using SoftwareVentas.Data.Seeders;
 using SoftwareVentas.Services;
 
 
@@ -35,7 +36,30 @@ namespace SoftwareVentas
 
             return builder;
         }
-        public static void AddServices(WebApplicationBuilder builder)
+		private static void AddIAM(WebApplicationBuilder builder)
+		{
+			builder.Services.AddIdentity<User, IdentityRole>(conf =>
+			{
+				conf.User.RequireUniqueEmail = true;
+				conf.Password.RequireDigit = false;
+				conf.Password.RequiredUniqueChars = 0;
+				conf.Password.RequireLowercase = false;
+				conf.Password.RequireUppercase = false;
+				conf.Password.RequireNonAlphanumeric = false;
+				conf.Password.RequiredLength = 4;
+			}).AddEntityFrameworkStores<DataContext>()
+			  .AddDefaultTokenProviders();
+
+			builder.Services.ConfigureApplicationCookie(conf =>
+			{
+				conf.Cookie.Name = "Auth";
+				conf.ExpireTimeSpan = TimeSpan.FromDays(100);
+				conf.LoginPath = "/Account/Login";
+				conf.AccessDeniedPath = "/Account/NotAuthorized";
+			});
+		}
+
+		public static void AddServices(WebApplicationBuilder builder)
         {
             // Services
             builder.Services.AddScoped<IProductsService, ProductsService>();
