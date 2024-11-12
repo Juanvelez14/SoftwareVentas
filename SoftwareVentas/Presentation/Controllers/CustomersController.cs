@@ -1,30 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SoftwareVentas.BLL;
-using SoftwareVentas.Data;
 using SoftwareVentas.Data.Entities;
 
-// Here we define the controller
 namespace SoftwareVentas.Presentation.Controllers
 {
+    [Authorize]
     public class CustomersController : Controller
     {
         private readonly CustomerService _customerService;
 
-        // Inyección de dependencias del servicio CustomerService
         public CustomersController(CustomerService customerService)
         {
             _customerService = customerService;
         }
 
-        // obtener todos los clientes
+        // Obtener todos los clientes, accesible para empleados y administradores
+        [Authorize(Policy = "EmployeeOnly")]
         public async Task<IActionResult> Index()
         {
             var customers = await _customerService.GetAllCustomersAsync();
-            return View(customers); 
+            return View(customers);
         }
 
-        // obtener un cliente por ID
+        // Obtener un cliente por ID, accesible para empleados y administradores
+        [Authorize(Policy = "EmployeeOnly")]
         public async Task<IActionResult> Details(int id)
         {
             var customer = await _customerService.GetCustomerByIdAsync(id);
@@ -32,16 +32,18 @@ namespace SoftwareVentas.Presentation.Controllers
             {
                 return NotFound();
             }
-            return View(customer); 
+            return View(customer);
         }
 
-        // agregar un cliente
+        // Agregar un cliente, accesible solo para administradores
+        [Authorize(Policy = "AdminOnly")]
         public IActionResult Create()
         {
-            return View(); 
+            return View();
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Customer customer)
         {
@@ -53,7 +55,8 @@ namespace SoftwareVentas.Presentation.Controllers
             return View(customer);
         }
 
-        // editar un cliente
+        // Editar un cliente, accesible solo para administradores
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Edit(int id)
         {
             var customer = await _customerService.GetCustomerByIdAsync(id);
@@ -61,10 +64,11 @@ namespace SoftwareVentas.Presentation.Controllers
             {
                 return NotFound();
             }
-            return View(customer); 
+            return View(customer);
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Customer customer)
         {
@@ -81,7 +85,8 @@ namespace SoftwareVentas.Presentation.Controllers
             return View(customer);
         }
 
-        // eliminar un cliente
+        // Eliminar un cliente, accesible solo para administradores
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             var customer = await _customerService.GetCustomerByIdAsync(id);
@@ -89,10 +94,11 @@ namespace SoftwareVentas.Presentation.Controllers
             {
                 return NotFound();
             }
-            return View(customer); 
+            return View(customer);
         }
 
         [HttpPost, ActionName("Delete")]
+        [Authorize(Policy = "AdminOnly")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

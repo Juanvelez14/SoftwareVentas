@@ -17,9 +17,11 @@ namespace SoftwareVentas.Presentation.Controllers
         private readonly IUsersService _usersService;
         private readonly IRoleService _roleService;
 
+
         public UserController(IUsersService usersService)
         {
             _usersService = usersService;
+
         }
 
         [HttpGet]
@@ -101,5 +103,108 @@ namespace SoftwareVentas.Presentation.Controllers
             // Regresa a la vista con el modelo y los errores
             return View(dto);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            if (Guid.Empty.Equals(id))
+            {
+                return NotFound();
+            }
+
+            // Obtener el usuario por su ID
+            User user = await _usersService.GetUserAsync(id.ToString());
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Obtener la lista de roles
+            var roles = await _roleService.GetAllRolesAsync();
+
+            // Crear el DTO manualmente, asignando propiedades del usuario
+            UserDTO dto = new UserDTO
+            {
+                Id = id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Document = user.Document,
+                PhoneNumber = user.PhoneNumber,
+                RoleId = user.RoleId,
+                Role = roles.Select(r => new SelectListItem
+                {
+                    Value = r.Id,
+                    Text = r.Name,
+                    Selected = r.Id == user.RoleId.ToString()
+                }).ToList()
+            };
+
+            // Retornar el DTO a la vista
+            return View(dto);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(UserDTO dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Si el modelo no es válido, recarga los roles y vuelve a la vista con los errores
+                var roles = await _roleService.GetAllRolesAsync();
+                dto.Role = roles.Select(r => new SelectListItem
+                {
+                    Value = r.Id,
+                    Text = r.Name,
+                    Selected = r.Id == dto.RoleId.ToString()
+                }).ToList();
+
+                return View(dto);
+            }
+
+            // Obtener el usuario existente
+            User user = await _usersService.GetUserAsync(dto.Id.ToString());
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Actualizar propiedades del usuario con los valores del DTO
+            user.Email = dto.Email;
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
+            user.Document = dto.Document;
+            user.PhoneNumber = dto.PhoneNumber;
+            user.RoleId = dto.RoleId;
+
+            // Intentar actualizar el usuario utilizando el servicio de usuarios
+            IdentityResult result = await _usersService.UpdateUserAsync(user);
+
+            if (result.Succeeded)
+            {
+                // Si el usuario se actualizó correctamente, redirige a la página de índice
+                return RedirectToAction("Index");
+            }
+
+            // Si la actualización falló, agrega los errores al ModelState
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            // Recarga la lista de roles en caso de error
+            var rolesList = await _roleService.GetAllRolesAsync();
+            dto.Role = rolesList.Select(r => new SelectListItem
+            {
+                Value = r.Id,
+                Text = r.Name,
+                Selected = r.Id == dto.RoleId.ToString()
+            }).ToList();
+
+            // Regresa a la vista con el modelo y los errores
+            return View(dto);
+        }
+
+
     }
 }

@@ -6,24 +6,22 @@ namespace SoftwareVentas.DTOs
 {
     public class UserDTO
     {
+        // Id como Guid en UserDTO
         public Guid Id { get; set; }
 
         [Display(Name = "Documento")]
         [MaxLength(32, ErrorMessage = "El campo {0} debe tener maximo {1} caracteres")]
         [Required(ErrorMessage = "El campo {0} es requerido.")]
-
         public string Document { get; set; } = null!;
 
         [Display(Name = "Nombres")]
         [MaxLength(32, ErrorMessage = "El campo {0} debe tener maximo {1} caracteres")]
         [Required(ErrorMessage = "El campo {0} es requerido.")]
-
         public string FirstName { get; set; } = null!;
 
         [Display(Name = "Apellido")]
         [MaxLength(32, ErrorMessage = "El campo {0} debe tener maximo {1} caracteres")]
         [Required(ErrorMessage = "El campo {0} es requerido.")]
-
         public string LastName { get; set; } = null!;
 
         [Display(Name = "Telefono")]
@@ -46,8 +44,23 @@ namespace SoftwareVentas.DTOs
 
         public string FullName => $"{FirstName} {LastName}";
 
-        public int RoleId { get; set; }
+        public string RoleId { get; set; }
 
         public IEnumerable<SelectListItem> Role { get; set; }
+
+        // Conversión explícita de UserDTO a User
+        public static explicit operator User(UserDTO dto)
+        {
+            return new User
+            {
+                Id = dto.Id.ToString(), // Asignación directa de Guid
+                Email = dto.Email,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Document = dto.Document,
+                PhoneNumber = dto.PhoneNumber
+                // Asignar el resto de las propiedades necesarias
+            };
+        }
     }
 }
