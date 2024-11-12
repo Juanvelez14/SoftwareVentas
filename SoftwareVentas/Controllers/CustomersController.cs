@@ -24,7 +24,7 @@ namespace SoftwareVentas.Controllers
             _notifyService = notifyService;
         }
 
-		[Authorize(Policy = "EmployeeOnly")]
+		[HttpGet]
 		public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
                                                [FromQuery] int? Page,
                                                [FromQuery] string? Filter)
