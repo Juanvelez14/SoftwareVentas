@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SoftwareVentas.BLL;
-using SoftwareVentas.Data;
 using SoftwareVentas.Data.Entities;
 
-
-// Here we define the controller
 namespace SoftwareVentas.Presentation.Controllers
 {
     [Authorize]
@@ -19,7 +15,8 @@ namespace SoftwareVentas.Presentation.Controllers
             _productService = productService;
         }
 
-        [AllowAnonymous]
+        // Ver la lista de productos, accesible para empleados y administradores
+        [Authorize(Policy = "EmployeeOnly")]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -27,6 +24,8 @@ namespace SoftwareVentas.Presentation.Controllers
             return View(products);
         }
 
+        // Agregar un producto, accesible solo para administradores
+        [Authorize(Policy = "AdminOnly")]
         [HttpGet]
         public IActionResult Create()
         {
@@ -34,6 +33,7 @@ namespace SoftwareVentas.Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Create(Product product)
         {
             if (!ModelState.IsValid)
@@ -45,6 +45,8 @@ namespace SoftwareVentas.Presentation.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // Editar un producto, accesible solo para administradores
+        [Authorize(Policy = "AdminOnly")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -57,6 +59,7 @@ namespace SoftwareVentas.Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Edit(Product product)
         {
             if (!ModelState.IsValid)
@@ -68,6 +71,8 @@ namespace SoftwareVentas.Presentation.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // Eliminar un producto, accesible solo para administradores
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {

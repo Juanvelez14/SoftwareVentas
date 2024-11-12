@@ -29,27 +29,37 @@ builder.Services.AddScoped<CustomerService>();
 
 // Registrar ProductService en el contenedor de dependencias
 builder.Services.AddScoped<ProductService>(); // Asegúrate de que esto esté registrado correctamente
+
 // Registrar UserService en el contenedor de dependencias
 builder.Services.AddScoped<IUsersService, UserService>();
 
-
-// Identity and Access Managment
+// Identity and Access Management
 AddIAM(builder);
 
 void AddIAM(WebApplicationBuilder builder)
 {
-    builder.Services.AddIdentity<User, IdentityRole>( conf =>
-        {
-            conf.User.RequireUniqueEmail = true;
-            conf.Password.RequireDigit = false;
-            conf.Password.RequiredUniqueChars = 0;
-            conf.Password.RequireLowercase = false;
-            conf.Password.RequireUppercase = false;
-            conf.Password.RequireNonAlphanumeric = false;
-            conf.Password.RequiredLength = 4;
-        }).AddEntityFrameworkStores<DataContext>()
-          .AddDefaultTokenProviders();
+    // Configurar Identity y Roles
+    builder.Services.AddIdentity<User, IdentityRole>(conf =>
+    {
+        conf.User.RequireUniqueEmail = true;
+        conf.Password.RequireDigit = false;
+        conf.Password.RequiredUniqueChars = 0;
+        conf.Password.RequireLowercase = false;
+        conf.Password.RequireUppercase = false;
+        conf.Password.RequireNonAlphanumeric = false;
+        conf.Password.RequiredLength = 4;
+    })
+    .AddEntityFrameworkStores<DataContext>()
+    .AddDefaultTokenProviders();
 
+    // Registrar las políticas de autorización
+    builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy("AdminOnly", policy => policy.RequireRole("Administrador"));
+        options.AddPolicy("EmployeeOnly", policy => policy.RequireRole("Empleado"));
+    });
+
+    // Configuración de cookies
     builder.Services.ConfigureApplicationCookie(conf =>
     {
         conf.Cookie.Name = "Auth";
@@ -59,12 +69,9 @@ void AddIAM(WebApplicationBuilder builder)
     });
 }
 
-
-
 // Configurar otros servicios si es necesario
 
 WebApplication app = builder.Build();
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -76,11 +83,11 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-
 app.UseAuthentication();
 app.UseRouting();
 app.UseAuthorization();
 
+// Definir rutas y controladores
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
