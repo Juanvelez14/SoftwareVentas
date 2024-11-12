@@ -15,6 +15,6 @@ namespace SoftwareVentas.Data.Entities
         public int Stock { get; set; }
         [Range(0, 100, ErrorMessage = "El campo '{0}' debe estar entre 0 y 100.")]
         public decimal Discount { get; set; }
-
+        
     }
 }

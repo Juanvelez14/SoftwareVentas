@@ -1,32 +1,11 @@
-using SoftwareVentas.BLL;
-using SoftwareVentas.Data;
-using Microsoft.EntityFrameworkCore;
+using SoftwareVentas;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews()
-    .AddRazorOptions(options =>
-    {
-        // Configurar la ruta de las vistas en la carpeta "Presentation/Views"
-        options.ViewLocationFormats.Clear();
-        options.ViewLocationFormats.Add("/Presentation/Views/{1}/{0}.cshtml");  // Ruta para vistas
-        options.ViewLocationFormats.Add("/Presentation/Views/Shared/{0}.cshtml");  // Ruta para vistas compartidas
-    });
+builder.Services.AddControllersWithViews();
 
-// Registrar Data Context para la base de datos
-builder.Services.AddDbContext<DataContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MyConnection"));
-});
-
-// Registrar CustomerService en el contenedor de dependencias
-builder.Services.AddScoped<CustomerService>();
-
-// Registrar ProductService en el contenedor de dependencias
-builder.Services.AddScoped<ProductService>(); // Asegúrate de que esto esté registrado correctamente
-
-// Configurar otros servicios si es necesario
+builder.AddCustomBuilderConfiguration();
 
 WebApplication app = builder.Build();
 
@@ -34,18 +13,21 @@ WebApplication app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseAuthentication();
 app.UseRouting();
-
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.AddCustomWebAppConfiguration();
 
 app.Run();
