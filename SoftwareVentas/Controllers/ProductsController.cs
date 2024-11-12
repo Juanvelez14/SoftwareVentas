@@ -27,6 +27,7 @@ namespace SoftwareVentas.Controllers
 
 		[AllowAnonymous]
 		// Ver la lista de productos, accesible para empleados y administradores
+		[Authorize(Policy = "EmployeeOnly")]
 		[HttpGet]
         public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
                                                [FromQuery] int? Page,

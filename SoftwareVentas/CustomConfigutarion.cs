@@ -24,10 +24,10 @@ namespace SoftwareVentas
             // Services
             AddServices(builder);
 
-            // Identity and Acces Managment
-
-            // Toast Notification
-            builder.Services.AddNotyf(config =>
+			// Identity and Acces Managment
+			AddIAM(builder);
+			// Toast Notification
+			builder.Services.AddNotyf(config =>
             {
                 config.DurationInSeconds = 10;
                 config.IsDismissable = true;
@@ -49,6 +49,14 @@ namespace SoftwareVentas
 				conf.Password.RequiredLength = 4;
 			}).AddEntityFrameworkStores<DataContext>()
 			  .AddDefaultTokenProviders();
+			// Registrar las políticas de autorización
+
+			builder.Services.AddAuthorization(options =>
+				{
+					options.AddPolicy("AdminOnly", policy => policy.RequireRole("Administrador"));
+					options.AddPolicy("EmployeeOnly", policy => policy.RequireRole("Empleado"));
+				});
+
 
 			builder.Services.ConfigureApplicationCookie(conf =>
 			{
@@ -64,8 +72,9 @@ namespace SoftwareVentas
             // Services
             builder.Services.AddScoped<IProductsService, ProductsService>();
             builder.Services.AddScoped<ICustomerService, CustomerService>();
-            // Helpers
-        }
+			builder.Services.AddScoped<IUsersService, UserService>();
+			// Helpers
+		}
 
         public static WebApplication AddCustomWebAppConfiguration(this WebApplication app)
         {
