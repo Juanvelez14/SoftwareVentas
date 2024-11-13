@@ -25,6 +25,6 @@ namespace SoftwareVentas.Data.Entities
 		public string RoleId { get; set; } = null!;
 
 		// Propiedad de navegación opcional hacia el rol
-		public virtual IdentityRole Role { get; set; }
+		public Role Role { get; set; }
 	}
 }

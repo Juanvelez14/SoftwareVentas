@@ -1,4 +1,5 @@
-﻿using SoftwareVentas.Services;
+﻿using AspNetCoreHero.ToastNotification.Abstractions;
+using SoftwareVentas.Services;
 using SoftwareVentas.DTOs;
 using Microsoft.AspNetCore.Mvc;
 

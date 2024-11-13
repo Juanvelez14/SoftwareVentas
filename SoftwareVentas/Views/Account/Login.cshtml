@@ -1,4 +1,5 @@
-﻿@{
+﻿@model SoftwareVentas.DTOs.LoginDTO
+@{
     ViewData["Title"] = "Login";
     Layout = null;
 }
@@ -45,15 +46,20 @@
                                     <div class="text-center">
                                         <h1 class="h4 text-gray-900 mb-4">Bienvenido!</h1>
                                     </div>
-                                    <form class="user">
-                                        <div class="form-group">
-                                            <input type="email" class="form-control form-control-user"
-                                                   id="exampleInputEmail" aria-describedby="emailHelp"
-                                                   placeholder="Ingresa tu email...">
+                                    <form class="user" asp-action="Login" novalidate method="POST">
+                                        <div class="col-12">
+                                            <label for="yourUsername" class="form-label">@Html.DisplayNameFor(model => model.Email)</label>
+                                            <div class="input-group has-validation">
+                                                <span class="input-group-text" id="inputGroupPrepend">@@</span>
+                                                <input type="text" asp-for="Email" class="form-control">
+                                            </div>
+                                            <span asp-validation-for="Email" class="text-danger"></span>
                                         </div>
-                                        <div class="form-group">
-                                            <input type="password" class="form-control form-control-user"
-                                                   id="exampleInputPassword" placeholder="Contraseña....">
+
+                                        <div class="col-12">
+                                            <label for="yourPassword" class="form-label">@Html.DisplayNameFor(model => model.Passwod)</label>
+                                            <input type="Passwod" asp-for="Passwod" class="form-control">
+                                            <span asp-validation-for="Passwod" class="text-danger"></span>
                                         </div>
                                         <div class="form-group">
                                             <div class="custom-control custom-checkbox small">
@@ -63,9 +69,7 @@
                                                 </label>
                                             </div>
                                         </div>
-                                        <a href="index.html" class="btn btn-primary btn-user btn-block">
-                                            Login
-                                        </a>
+                                        <button class="btn btn-primary w-100" type="submit">Iniciar sesión</button>
                                         <hr>
                                         
                                     </form>

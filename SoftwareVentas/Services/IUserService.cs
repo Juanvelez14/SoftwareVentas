@@ -14,7 +14,7 @@ namespace SoftwareVentas.Services
 	{
 		public Task<List<User>> GetAllUsersAsync();
 		public Task<IdentityResult> AddUserAsync(User user, string password);
-		public Task<IdentityResult> ConfirmEmail(User user, string token);
+		public Task<IdentityResult> ConfirmEmailAsync(User user, string token);
 		public Task<string> GenerateEmailConfirmationTokenAsync(User user);
         public Task<Core.Response<PaginationResponse<User>>> GetListAsync(PaginationRequest request);
         public Task<User> GetUserAsync(string email);
@@ -48,7 +48,7 @@ namespace SoftwareVentas.Services
 			return await _userManager.CreateAsync(user, password);
 		}
 
-		public async Task<IdentityResult> ConfirmEmail(User user, string token)
+		public async Task<IdentityResult> ConfirmEmailAsync(User user, string token)
 		{
 			return await _userManager.ConfirmEmailAsync(user, token);
 		}

@@ -41,7 +41,7 @@
                 <td>@item.Email</td>
                 <td>@item.Document</td>
                 <td>@item.PhoneNumber</td>
-                <td>@item.Role.Name</td>
+                <td>@item.Role.RoleName</td>
                 <td>
                     <a class="btn btn-warning" asp-action="Edit" method="POST" asp-route-id="@item.Id">Edit</a>
                     <form asp-action="Delete" asp-route-id="@item.Id" method="POST" style="display: contents;">

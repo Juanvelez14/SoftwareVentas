@@ -19,6 +19,7 @@ namespace SoftwareVentas
             builder.Services.AddDbContext<DataContext>(configuration =>
             {
                 configuration.UseSqlServer(builder.Configuration.GetConnectionString("MyConnection"));
+                //configuration.UseSqlServer(builder.Configuration.GetConnectionString("MiConexionLocal"));
             });
 
             // Services
