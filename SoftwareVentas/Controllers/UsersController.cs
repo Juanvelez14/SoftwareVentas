@@ -18,10 +18,11 @@ namespace SoftwareVentas.Controllers
 		private readonly IUsersService _usersService;
 		private readonly IRoleService _roleService;
 
-		public UserController(IUsersService usersService)
-		{
-			_usersService = usersService;
-		}
+        public UserController(IUsersService usersService, IRoleService roleService)
+        {
+            _usersService = usersService;
+            _roleService = roleService;  // Inyecta el servicio _roleService
+        }
 
         [AllowAnonymous]
         [HttpGet]
@@ -41,25 +42,31 @@ namespace SoftwareVentas.Controllers
         }
 
         [HttpGet]
-		public async Task<IActionResult> Create()
-		{
-			// Obtener la lista de roles directamente desde el servicio UserManager o RoleManager
-			var roles = await _roleService.GetAllRolesAsync();
+        public async Task<IActionResult> Create()
+        {
+            var roles = await _roleService.GetAllRolesAsync();
 
-			// Crear el DTO y asignar los roles
-			UserDTO dto = new UserDTO
-			{
-				Role = roles.Select(r => new SelectListItem
-				{
-					Value = r.Id, // Id del rol
-					Text = r.Name // Nombre del rol
-				}).ToList()
-			};
+            if (roles == null || !roles.Any())
+            {
+                // Manejar el caso de roles vacíos o nulos
+                ModelState.AddModelError(string.Empty, "No se encontraron roles.");
+                return View(new UserDTO());  // Regresar una vista con un DTO vacío o con valores por defecto
+            }
 
-			return View(dto);
-		}
+            UserDTO dto = new UserDTO
+            {
+                Role = roles.Select(r => new SelectListItem
+                {
+                    Value = r.Id,
+                    Text = r.Name
+                }).ToList()
+            };
 
-		[HttpPost]
+            return View(dto);  // Asegúrate de que siempre se regrese un valor
+        }
+
+
+        [HttpPost]
 		public async Task<IActionResult> Create(UserDTO dto)
 		{
 			if (!ModelState.IsValid)

@@ -12,7 +12,7 @@ using SoftwareVentas.Requests;
 namespace SoftwareVentas.Controllers
 {
     // Controlador de productos, accesible solo para usuarios autenticados
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize]
     public class ProductsController : Controller
     {
         private readonly IProductsService _productService;
@@ -44,7 +44,7 @@ namespace SoftwareVentas.Controllers
         }
 
         // Acción para crear un producto, accesible solo por administradores
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize]
         [HttpGet]
         public IActionResult Create()
         {
@@ -52,7 +52,7 @@ namespace SoftwareVentas.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize]
         public async Task<IActionResult> Create(Product product)
         {
             try
@@ -81,7 +81,7 @@ namespace SoftwareVentas.Controllers
         }
 
         // Acción para editar un producto, accesible solo por administradores
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Edit([FromRoute] int id)
         {
@@ -97,7 +97,7 @@ namespace SoftwareVentas.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize]
         public async Task<IActionResult> Edit(Product product)
         {
             try
@@ -127,7 +127,7 @@ namespace SoftwareVentas.Controllers
         }
 
         // Acción para eliminar un producto, accesible solo por administradores
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {

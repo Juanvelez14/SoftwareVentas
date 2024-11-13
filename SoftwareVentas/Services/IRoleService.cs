@@ -48,11 +48,13 @@ namespace SoftwareVentas.Services
             return result;
         }
 
-        public RoleService(RoleManager<IdentityRole> roleManager, DataContext context)
+        public RoleService(RoleManager<IdentityRole> roleManager, UserManager<User> userManager, DataContext context)
         {
             _roleManager = roleManager;
+            _userManager = userManager;  // Aquí se inyecta el UserManager
             _context = context;
         }
+
 
         // Método para obtener todos los roles
         public async Task<List<IdentityRole>> GetAllRolesAsync()

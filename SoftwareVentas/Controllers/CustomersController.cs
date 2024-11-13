@@ -24,7 +24,7 @@ namespace SoftwareVentas.Controllers
             _notifyService = notifyService;
         }
 
-		[Authorize(Policy = "EmployeeOnly")]
+		[Authorize]
 		public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
                                                [FromQuery] int? Page,
                                                [FromQuery] string? Filter)
@@ -42,14 +42,14 @@ namespace SoftwareVentas.Controllers
             return View(response.Result);
         }
 
-		[Authorize(Policy = "AdminOnly")]
+		[Authorize]
 		public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
-		[Authorize(Policy = "AdminOnly")]
+		[Authorize]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Create(Customer customer)
         {
@@ -78,7 +78,7 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-		[Authorize(Policy = "AdminOnly")]
+		[Authorize]
 		public async Task<IActionResult> Edit([FromRoute] int id)
         {
             Response<Customer> response = await _customerService.GetOneAsync(id);
@@ -94,7 +94,7 @@ namespace SoftwareVentas.Controllers
 
 
         [HttpPost]
-		[Authorize(Policy = "AdminOnly")]
+		[Authorize]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Edit(Customer customer)
         {
@@ -124,7 +124,7 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-		[Authorize(Policy = "AdminOnly")]
+		[Authorize]
 		public async Task<IActionResult> Delete([FromRoute] int id)
         {
             Response<Customer> response = await _customerService.DeleteteAsync(id);

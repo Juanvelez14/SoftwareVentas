@@ -21,7 +21,8 @@ namespace SoftwareVentas.Services
 		public Task<SignInResult> LoginAsync(LoginDTO dto);
 		public Task LogoutAsync();
 		public Task<IdentityResult> UpdateUserAsync(User user);
-	}
+        Task AddToRoleAsync(User user, string roleName);
+    }
 	public class UserService : IUsersService
 	{
 		private readonly DataContext _context;
@@ -165,5 +166,14 @@ namespace SoftwareVentas.Services
 				};
 			}
 		}
-	}
+
+        public async Task AddToRoleAsync(User user, string roleName)
+        {
+            var result = await _userManager.AddToRoleAsync(user, roleName);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException($"No se pudo asignar el rol {roleName} al usuario.");
+            }
+        }
+    }
 }

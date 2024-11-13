@@ -1,56 +1,48 @@
-using SoftwareVentas;
-using Microsoft.EntityFrameworkCore;
+using AspNetCoreHero.ToastNotification;
 using Microsoft.AspNetCore.Identity;
-using SoftwareVentas.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 using SoftwareVentas.Data;
+using SoftwareVentas.Data.Entities;
+using SoftwareVentas.Helpers;
 using SoftwareVentas.Data.Seeders;
+using SoftwareVentas.Services;
+using AspNetCoreHero.ToastNotification.Extensions;
+using SoftwareVentas;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
-// Configuración de servicios
+// Configuración de servicios de la aplicación
+builder.AddCustomBuilderConfiguration(); // Llama al método de configuración personalizada
+
+// Agregar servicios de controladores y vistas
 builder.Services.AddControllersWithViews();
 
-// Configuración personalizada
-builder.AddCustomBuilderConfiguration();
+builder.Services.AddScoped<IRoleService, RoleService>();
 
-// Agregar configuración de identidad (ya maneja la autenticación)
-// Reemplaza esta parte asegurándote de que solo se registre una vez
-builder.Services.AddIdentityCore<User>(options =>
-{
-    // Configura las opciones necesarias, como se explicó arriba
-})
-    .AddRoles<IdentityRole>()  // Asegúrate de agregar los roles si se utilizan
-    .AddEntityFrameworkStores<DataContext>()
-    .AddDefaultTokenProviders();
 
-// Configuración de autorización
-builder.Services.AddAuthorization(options =>
-{
-    // Configurar las políticas de autorización
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Administrador"));
-    options.AddPolicy("EmployeeOnly", policy => policy.RequireRole("Empleado"));
-});
+var app = builder.Build();
 
-WebApplication app = builder.Build();
-
-// Ejecutar migraciones pendientes y el seeder
+// Llamar al seeder para inicializar los roles y usuarios si es necesario
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-
-    // Obtener el contexto de la base de datos
-    var context = services.GetRequiredService<DataContext>();
-
-    // Aplicar migraciones pendientes
-    await context.Database.MigrateAsync();  // Usar versión asincrónica
-
-    // Ejecutar el seeder para roles y usuarios
-    var userRolesSeeder = services.GetRequiredService<UserRolesSeeder>();
-    await userRolesSeeder.SeedAsync();
+    var seeder = scope.ServiceProvider.GetRequiredService<UserRolesSeeder>();
+    try
+    {
+        await seeder.SeedAsync();  // Llama al método para crear roles y usuarios
+    }
+    catch (Exception ex)
+    {
+        // Maneja cualquier error que pueda ocurrir al hacer el seeding
+        Console.Error.WriteLine($"Error al inicializar roles y usuarios: {ex.Message}");
+    }
 }
 
-// Configuración del pipeline HTTP
-if (!app.Environment.IsDevelopment())
+// Configuración de middlewares
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
@@ -58,16 +50,18 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-// Configuración de la autenticación y autorización
-app.UseAuthentication(); // Asegúrate de que la autenticación está antes de la autorización
 app.UseRouting();
+
+// Usar autenticación y autorización
+app.UseAuthentication();
 app.UseAuthorization();
 
+// Usar Toast Notifications
+app.UseNotyf();
+
+// Configurar rutas de los controladores
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.AddCustomWebAppConfiguration(); // Configuración adicional de la app
 
 app.Run();

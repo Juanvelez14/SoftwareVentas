@@ -16,10 +16,11 @@ namespace SoftwareVentas.Data.Seeders
             _usersService = usersService;
         }
 
+        // Este es el método principal que se debe llamar desde Program.cs
         public async Task SeedAsync()
         {
-            await CheckRoles();
-            await CheckUsers();
+            await CheckRoles();  // Verificar y crear roles si no existen
+            await CheckUsers();  // Verificar y crear usuarios si no existen
         }
 
         private async Task CheckUsers()
@@ -79,6 +80,8 @@ namespace SoftwareVentas.Data.Seeders
                 };
 
                 await _usersService.AddUserAsync(user, "1234");
+                // Asignar el rol al usuario explícitamente
+                await _usersService.AddToRoleAsync(user, "Gestor de contenido");
 
                 string token = await _usersService.GenerateEmailConfirmationTokenAsync(user);
                 await _usersService.ConfirmEmailAsync(user, token);
