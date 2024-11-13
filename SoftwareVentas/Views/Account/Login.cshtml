@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Login";
     Layout = null;
 }
@@ -75,7 +74,7 @@
                                         <a class="small" href="forgot-password.html"> Olvidaste tu constraseña?</a>
                                     </div>
                                     <div class="text-center">
-                                        <a class="small" href="register.html">Crea una cuenta!</a>
+                                        <a class="nav-link" asp-controller="User" asp-action="Index">Crea una cuenta!</a>
                                     </div>
                                 </div>
                             </div>
@@ -98,6 +97,12 @@
 
     <!-- Custom scripts for all pages-->
     <script src="~/js/sb-admin-2.min.js"></script>
+
+    @await Component.InvokeAsync("Notyf")
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 
 </body>
 
