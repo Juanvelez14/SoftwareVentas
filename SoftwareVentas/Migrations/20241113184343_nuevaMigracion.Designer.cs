@@ -12,8 +12,8 @@ using SoftwareVentas.Data;
 namespace SoftwareVentas.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241113043113_UpdateProductDecimals")]
-    partial class UpdateProductDecimals
+    [Migration("20241113184343_nuevaMigracion")]
+    partial class nuevaMigracion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -287,11 +287,8 @@ namespace SoftwareVentas.Migrations
 
             modelBuilder.Entity("SoftwareVentas.Data.Entities.Role", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("RoleName")
                         .IsRequired()
@@ -308,8 +305,8 @@ namespace SoftwareVentas.Migrations
 
             modelBuilder.Entity("SoftwareVentas.Data.Entities.RolePermission", b =>
                 {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("PermissionId")
                         .HasColumnType("int");
@@ -504,7 +501,7 @@ namespace SoftwareVentas.Migrations
 
             modelBuilder.Entity("SoftwareVentas.Data.Entities.User", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", "Role")
+                    b.HasOne("SoftwareVentas.Data.Entities.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)

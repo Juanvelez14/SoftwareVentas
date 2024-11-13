@@ -13,6 +13,6 @@ namespace SoftwareVentas.DTOs
 		[MinLength(4, ErrorMessage = "El campo '{0}' debe tener al menos {1} caracteres")]
 		[Required(ErrorMessage = "El campo '{0}' es requerido")]
 
-		public string Passwod { get; set; } = null!;
+		public string Password { get; set; } = null!;
 	}
 }

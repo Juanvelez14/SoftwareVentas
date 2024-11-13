@@ -5,7 +5,7 @@ namespace SoftwareVentas.Data.Entities
 	public class Role
 	{
 		[Key]
-		public int Id { get; set; }
+		public String Id { get; set; }
 
 		[Display(Name = "Rol")]
 		[MaxLength(64, ErrorMessage = "El campo '{0}' debe tener un máximo de '{1}' caracteres.")]
