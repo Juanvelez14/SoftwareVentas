@@ -73,7 +73,7 @@ namespace SoftwareVentas.Services
 			}
 			var rolePermission = new RolePermission
 			{
-				RoleId = roleId,
+				RoleId = roleId.ToString(),
 				PermissionId = permissionId
 			};
 			_context.RolePermissions.Add(rolePermission);
@@ -84,7 +84,7 @@ namespace SoftwareVentas.Services
 		public async Task<IdentityResult> RemovePermissionFromRoleAsync(int roleId, int permissionId)
 		{
 			var rolePermission = await _context.RolePermissions
-											   .FirstOrDefaultAsync(rp => rp.RoleId == roleId && rp.PermissionId == permissionId);
+											   .FirstOrDefaultAsync(rp => rp.RoleId == roleId.ToString() && rp.PermissionId == permissionId);
 			if (rolePermission == null)
 			{
 				return IdentityResult.Failed(new IdentityError { Description = "Relación de permiso no encontrada" });
