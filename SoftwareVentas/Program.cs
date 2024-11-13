@@ -2,63 +2,65 @@ using SoftwareVentas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using SoftwareVentas.Data.Entities;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SoftwareVentas.Data;
+using SoftwareVentas.Data.Seeders;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Configuración de servicios
 builder.Services.AddControllersWithViews();
 
+// Configuración personalizada
 builder.AddCustomBuilderConfiguration();
+
+// Agregar configuración de identidad (ya maneja la autenticación)
+// Reemplaza esta parte asegurándote de que solo se registre una vez
+builder.Services.AddIdentityCore<User>(options =>
+{
+    // Configura las opciones necesarias, como se explicó arriba
+})
+    .AddRoles<IdentityRole>()  // Asegúrate de agregar los roles si se utilizan
+    .AddEntityFrameworkStores<DataContext>()
+    .AddDefaultTokenProviders();
+
+// Configuración de autorización
+builder.Services.AddAuthorization(options =>
+{
+    // Configurar las políticas de autorización
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Administrador"));
+    options.AddPolicy("EmployeeOnly", policy => policy.RequireRole("Empleado"));
+});
 
 WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Ejecutar migraciones pendientes y el seeder
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    // Obtener el contexto de la base de datos
+    var context = services.GetRequiredService<DataContext>();
+
+    // Aplicar migraciones pendientes
+    await context.Database.MigrateAsync();  // Usar versión asincrónica
+
+    // Ejecutar el seeder para roles y usuarios
+    var userRolesSeeder = services.GetRequiredService<UserRolesSeeder>();
+    await userRolesSeeder.SeedAsync();
+}
+
+// Configuración del pipeline HTTP
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-//AddIAM(builder);
-
-//void AddIAM(WebApplicationBuilder builder)
-//{
-//	// Configurar Identity y Roles
-//	builder.Services.AddIdentity<User, IdentityRole>(conf =>
-//	{
-//		conf.User.RequireUniqueEmail = true;
-//		conf.Password.RequireDigit = false;
-//		conf.Password.RequiredUniqueChars = 0;
-//		conf.Password.RequireLowercase = false;
-//		conf.Password.RequireUppercase = false;
-//		conf.Password.RequireNonAlphanumeric = false;
-//		conf.Password.RequiredLength = 4;
-//	})
-//	.AddEntityFrameworkStores<DataContext>()
-//	.AddDefaultTokenProviders();
-//	// Registrar las políticas de autorización
-//	builder.Services.AddAuthorization(options =>
-//	{
-//		options.AddPolicy("AdminOnly", policy => policy.RequireRole("Administrador"));
-//		options.AddPolicy("EmployeeOnly", policy => policy.RequireRole("Empleado"));
-//	});
-
-//	// Configuración de cookies
-//	builder.Services.ConfigureApplicationCookie(conf =>
-//	{
-//		conf.Cookie.Name = "Auth";
-//		conf.ExpireTimeSpan = TimeSpan.FromDays(100);
-//		conf.LoginPath = "/Account/Login";
-//		conf.AccessDeniedPath = "/Account/NotAuthorized";
-//	});
-//}
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseAuthentication();
+// Configuración de la autenticación y autorización
+app.UseAuthentication(); // Asegúrate de que la autenticación está antes de la autorización
 app.UseRouting();
 app.UseAuthorization();
 
@@ -66,6 +68,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.AddCustomWebAppConfiguration();
+app.AddCustomWebAppConfiguration(); // Configuración adicional de la app
 
 app.Run();

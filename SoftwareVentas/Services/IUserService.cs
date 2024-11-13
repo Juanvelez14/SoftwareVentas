@@ -105,7 +105,7 @@ namespace SoftwareVentas.Services
 
 		public async Task<SignInResult> LoginAsync(LoginDTO dto)
 		{
-			return await _signInManager.PasswordSignInAsync(dto.Email, dto.Passwod, false, false);
+			return await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);
 		}
 
 		public async Task LogoutAsync()

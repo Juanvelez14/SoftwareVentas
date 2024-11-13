@@ -68,13 +68,17 @@ namespace SoftwareVentas.Services
                 return IdentityResult.Failed(new IdentityError { Description = "El rol ya existe" });
             }
 
-            return await _roleManager.CreateAsync(new IdentityRole(roleName));
+            // Crear un rol de tipo IdentityRole directamente
+            var newRole = new IdentityRole(roleName);
+            return await _roleManager.CreateAsync(newRole);
         }
+
 
         // Método para eliminar un rol
         public async Task<IdentityResult> DeleteRoleAsync(string roleId)
         {
-            IdentityRole role = await _roleManager.FindByIdAsync(roleId.ToString());
+            // Usar directamente roleId como string, no hace falta hacer .ToString()
+            IdentityRole role = await _roleManager.FindByIdAsync(roleId);
 
             if (role != null)
             {
@@ -83,6 +87,7 @@ namespace SoftwareVentas.Services
 
             return IdentityResult.Failed(new IdentityError { Description = "Rol no encontrado" });
         }
+
         // Asignar un permiso a un rol
         public async Task<IdentityResult> AssignPermissionToRoleAsync(string roleId, int permissionId)
         {

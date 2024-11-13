@@ -9,12 +9,11 @@ using SoftwareVentas.Data.Entities;
 using SoftwareVentas.Helpers;
 using SoftwareVentas.Requests;
 
-
-// Here we define the controller
 namespace SoftwareVentas.Controllers
 {
-	[Authorize]
-	public class ProductsController : Controller
+    // Controlador de productos, accesible solo para usuarios autenticados
+    [Authorize(Policy = "AdminOnly")]
+    public class ProductsController : Controller
     {
         private readonly IProductsService _productService;
         private readonly INotyfService _notifyService;
@@ -25,10 +24,9 @@ namespace SoftwareVentas.Controllers
             _notifyService = notifyService;
         }
 
-		[AllowAnonymous]
-		// Ver la lista de productos, accesible para empleados y administradores
-		[Authorize(Policy = "EmployeeOnly")]
-		[HttpGet]
+        // Esta acción ahora es accesible para todos los usuarios autenticados (sin roles específicos)
+        [AllowAnonymous]  // Acceso público para ver la lista de productos
+        [HttpGet]
         public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
                                                [FromQuery] int? Page,
                                                [FromQuery] string? Filter)
@@ -37,25 +35,25 @@ namespace SoftwareVentas.Controllers
             {
                 RecordsPerPage = RecordsPerPage ?? 15,
                 Page = Page ?? 1,
-                Filter = Filter 
+                Filter = Filter
             };
-            
-            Response<PaginationResponse<Product>> response= await _productService.GetListAsync(request);
 
+            Response<PaginationResponse<Product>> response = await _productService.GetListAsync(request);
 
             return View(response.Result);
         }
 
-		[Authorize(Policy = "AdminOnly")]
-		[HttpGet]
+        // Acción para crear un producto, accesible solo por administradores
+        [Authorize(Policy = "AdminOnly")]
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
-		[Authorize(Policy = "AdminOnly")]
-		public async Task<IActionResult> Create(Product product)
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> Create(Product product)
         {
             try
             {
@@ -82,8 +80,9 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-		[Authorize(Policy = "AdminOnly")]
-		[HttpGet]
+        // Acción para editar un producto, accesible solo por administradores
+        [Authorize(Policy = "AdminOnly")]
+        [HttpGet]
         public async Task<IActionResult> Edit([FromRoute] int id)
         {
             Response<Product> response = await _productService.GetOneAsync(id);
@@ -97,10 +96,9 @@ namespace SoftwareVentas.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
         [HttpPost]
-		[Authorize(Policy = "AdminOnly")]
-		public async Task<IActionResult> Edit(Product product)
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> Edit(Product product)
         {
             try
             {
@@ -128,8 +126,9 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-		[Authorize(Policy = "AdminOnly")]
-		[HttpPost]
+        // Acción para eliminar un producto, accesible solo por administradores
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPost]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             Response<Product> response = await _productService.DeleteteAsync(id);
@@ -145,6 +144,8 @@ namespace SoftwareVentas.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        // Acción para cambiar el estado del producto (ocultar/mostrar)
         [HttpPost]
         public async Task<IActionResult> Toggle(int ProductId, bool Hide)
         {

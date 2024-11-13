@@ -29,7 +29,13 @@ namespace SoftwareVentas.Data.Seeders
 
             if (user is null)
             {
-                Role adminRole = _context.Roles.FirstOrDefault(r => r.RoleName == Env.SUPER_ADMIN_ROLE_NAME);
+                Role adminRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == Env.SUPER_ADMIN_ROLE_NAME);
+
+                if (adminRole == null)
+                {
+                    // Si el rol no existe, no puedes continuar creando el usuario, lanzas un error o logueas el evento.
+                    throw new InvalidOperationException("El rol de administrador no existe.");
+                }
 
                 user = new User
                 {
@@ -47,12 +53,19 @@ namespace SoftwareVentas.Data.Seeders
                 string token = await _usersService.GenerateEmailConfirmationTokenAsync(user);
                 await _usersService.ConfirmEmailAsync(user, token);
             }
+
             // Content Manager
             user = await _usersService.GetUserAsync("usuario2@hotmail.com");
 
             if (user is null)
             {
-                Role contentManagerRole = _context.Roles.FirstOrDefault(r => r.RoleName == "Gestor de contenido");
+                Role contentManagerRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Gestor de contenido");
+
+                if (contentManagerRole == null)
+                {
+                    // Si el rol no existe, puedes crear el rol o lanzar una excepción similar a la anterior
+                    throw new InvalidOperationException("El rol de Gestor de contenido no existe.");
+                }
 
                 user = new User
                 {
@@ -71,6 +84,7 @@ namespace SoftwareVentas.Data.Seeders
                 await _usersService.ConfirmEmailAsync(user, token);
             }
         }
+
         private async Task CheckRoles()
         {
             await AdminRoleAsync();
@@ -89,6 +103,7 @@ namespace SoftwareVentas.Data.Seeders
                 await _context.SaveChangesAsync();
             }
         }
+
         private async Task ContentManagerAsync()
         {
             bool exists = await _context.Roles.AnyAsync(r => r.RoleName == "Gestor de contenido");
@@ -112,10 +127,5 @@ namespace SoftwareVentas.Data.Seeders
                 await _context.SaveChangesAsync();
             }
         }
-
-
-
     }
-
-
 }

@@ -23,32 +23,26 @@ namespace SoftwareVentas.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginDTO dto)
         {
+            // Imprime en la consola los valores recibidos
+            Console.WriteLine($"Email: {dto.Email}, Password: {dto.Password}");
+
             if (ModelState.IsValid)
             {
-                // Establecer un punto de interrupción aquí
-                System.Diagnostics.Debugger.Break();
+                // Agregar más detalles de depuración
+                var result = await _usersService.LoginAsync(dto);
 
-                Microsoft.AspNetCore.Identity.SignInResult result = await _usersService.LoginAsync(dto);
-
-                // Verifica si el login fue exitoso
                 if (result.Succeeded)
                 {
-                    // Establecer un punto de interrupción para verificar los resultados de la autenticación
-                    System.Diagnostics.Debugger.Break();
-
-                    return RedirectToAction("Index", "Home");
+                    // Almacenar la sesión o cookies si es necesario
+                    return RedirectToAction("Index", "Home"); // Redirige a la página de inicio
                 }
-                ModelState.AddModelError(string.Empty, "Email o contraseña incorrectos");
-
-                // Establecer un punto de interrupción en caso de error de autenticación
-                System.Diagnostics.Debugger.Break();
-
-                return View(dto);
+                else
+                {
+                    // Proporcionar un mensaje más detallado sobre el error
+                    ModelState.AddModelError(string.Empty, "Email o contraseña incorrectos");
+                    return View(dto);
+                }
             }
-
-            // Establecer un punto de interrupción si ModelState no es válido
-            System.Diagnostics.Debugger.Break();
-
             return View(dto);
         }
 
