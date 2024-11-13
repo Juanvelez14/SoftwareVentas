@@ -24,10 +24,8 @@ namespace SoftwareVentas.Controllers
 		{
 			if (ModelState.IsValid)
 			{
-				string email = dto.Email;
-				string password = dto.Passwod;
 
-				Microsoft.AspNetCore.Identity.SignInResult result = await _usersService.LoginAsync(email, password);
+				Microsoft.AspNetCore.Identity.SignInResult result = await _usersService.LoginAsync(dto);
 
 				if (result.Succeeded)
 				{

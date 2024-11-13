@@ -1,5 +1,4 @@
-﻿using Azure;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -8,6 +7,8 @@ using SoftwareVentas.Services;
 using SoftwareVentas.Data.Entities;
 using SoftwareVentas.DTOs;
 using SoftwareVentas.Models;
+using SoftwareVentas.Core;
+using SoftwareVentas.Core.Pagination;
 
 namespace SoftwareVentas.Controllers
 {
@@ -22,17 +23,24 @@ namespace SoftwareVentas.Controllers
 			_usersService = usersService;
 		}
 
-		[HttpGet]
-		public async Task<IActionResult> Index()
-		{
-			// Obtener todos los usuarios
-			List<User> users = await _usersService.GetAllUsersAsync();
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
+                                               [FromQuery] int? Page,
+                                               [FromQuery] string? Filter)
+        {
+            PaginationRequest request = new PaginationRequest
+            {
+                RecordsPerPage = RecordsPerPage ?? 15,
+                Page = Page ?? 1,
+                Filter = Filter
+            };
 
-			// Pasar la lista de usuarios a la vista
-			return View(users);
-		}
+            Core.Response<PaginationResponse<User>> response = await _usersService.GetListAsync(request);
+            return View(response.Result);
+        }
 
-		[HttpGet]
+        [HttpGet]
 		public async Task<IActionResult> Create()
 		{
 			// Obtener la lista de roles directamente desde el servicio UserManager o RoleManager

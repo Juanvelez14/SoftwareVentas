@@ -1,9 +1,12 @@
-﻿using Azure;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SoftwareVentas.Core.Pagination;
+using SoftwareVentas.Core;
 using SoftwareVentas.Data;
 using SoftwareVentas.Data.Entities;
 using SoftwareVentas.DTOs;
+using SoftwareVentas.Helpers;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 
 namespace SoftwareVentas.Services
 {
@@ -13,8 +16,9 @@ namespace SoftwareVentas.Services
 		public Task<IdentityResult> AddUserAsync(User user, string password);
 		public Task<IdentityResult> ConfirmEmail(User user, string token);
 		public Task<string> GenerateEmailConfirmationTokenAsync(User user);
-		public Task<User> GetUserAsync(string email);
-		public Task<SignInResult> LoginAsync(string email, string password);
+        public Task<Core.Response<PaginationResponse<User>>> GetListAsync(PaginationRequest request);
+        public Task<User> GetUserAsync(string email);
+		public Task<SignInResult> LoginAsync(LoginDTO dto);
 		public Task LogoutAsync();
 		public Task<IdentityResult> UpdateUserAsync(User user);
 	}
@@ -54,7 +58,44 @@ namespace SoftwareVentas.Services
 			return await _userManager.GenerateEmailConfirmationTokenAsync(user);
 		}
 
-		public async Task<User> GetUserAsync(string email)
+        public async Task<Core.Response<PaginationResponse<User>>> GetListAsync(PaginationRequest request)
+        {
+            try
+            {
+                IQueryable<User> query = _context.Users.AsQueryable()
+                                                       .Include(u => u.Role);
+
+                if (!string.IsNullOrWhiteSpace(request.Filter))
+                {
+                    query = query.Where(s => s.FirstName.ToLower().Contains(request.Filter.ToLower())
+                                            || s.LastName.ToLower().Contains(request.Filter.ToLower())
+                                            || s.Document.ToLower().Contains(request.Filter.ToLower())
+                                            || s.Email.ToLower().Contains(request.Filter.ToLower())
+                                            || s.PhoneNumber.ToLower().Contains(request.Filter.ToLower()));
+                }
+
+                PagedList<User> list = await PagedList<User>.ToPagedListAsync(query, request);
+
+                PaginationResponse<User> result = new PaginationResponse<User>
+                {
+                    List = list,
+                    TotalCount = list.TotalCount,
+                    RecordsPerPage = list.RecordsPerPage,
+                    CurrentPage = list.CurrentPage,
+                    TotalPages = list.TotalPages,
+                    Filter = request.Filter
+                };
+
+                return ResponseHelper<PaginationResponse<User>>.MakeResponseSuccess(result, "Usuarios obtenidos con éxito");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper<PaginationResponse<User>>.MakeResponseFail(ex);
+            }
+        }
+
+
+        public async Task<User> GetUserAsync(string email)
 		{
 			User? user = await _context.Users.Include(u => u.Role)
 											  .FirstOrDefaultAsync(u => u.Email == email);
@@ -62,9 +103,9 @@ namespace SoftwareVentas.Services
 			return user;
 		}
 
-		public async Task<SignInResult> LoginAsync(string email, string password)
+		public async Task<SignInResult> LoginAsync(LoginDTO dto)
 		{
-			return await _signInManager.PasswordSignInAsync(email, password, false, false);
+			return await _signInManager.PasswordSignInAsync(dto.Email, dto.Passwod, false, false);
 		}
 
 		public async Task LogoutAsync()
@@ -89,8 +130,8 @@ namespace SoftwareVentas.Services
 						Message = "User not found."
 					};
 				}
-				// Actualizar las propiedades del usuario con los valores del DTO
-				user.Email = dto.Email;
+                // Actualizar las propiedades del usuario con los valores del DTO
+                user.Email = dto.Email;
 				user.FirstName = dto.FirstName;
 				user.LastName = dto.LastName;
 				user.Document = dto.Document;

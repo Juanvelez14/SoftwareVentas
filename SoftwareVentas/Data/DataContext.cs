@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using SoftwareVentas.Data.Entities;
 using System.Data;
+using System.Reflection.Emit;
+using static System.Collections.Specialized.BitVector32;
 
 namespace SoftwareVentas.Data
 {
@@ -45,8 +47,11 @@ namespace SoftwareVentas.Data
 		{
 			builder.Entity<Role>().HasIndex(s => s.RoleName)
 											.IsUnique();
+            // Sections
+            builder.Entity<Product>().HasIndex(s => s.Name)
+                                             .IsUnique();
 
-			builder.Entity<User>().HasIndex(u => u.Document)
+            builder.Entity<User>().HasIndex(u => u.Document)
 											.IsUnique();
 		}
 	}
