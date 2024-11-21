@@ -30,6 +30,8 @@ namespace SoftwareVentas.Data
                 .Property(p => p.Discount)
                 .HasColumnType("DECIMAL(18, 2)");  // Ajusta el tipo de columna para Discount
 
+            builder.Entity<Role>().Property(r => r.Id)
+                .ValueGeneratedOnAdd();
             // Llamada a otras configuraciones
             ConfigureKeys(builder);
             ConfigureIndexes(builder);

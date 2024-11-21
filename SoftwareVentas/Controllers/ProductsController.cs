@@ -1,13 +1,13 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SoftwareVentas.Services;
 using SoftwareVentas.Core;
+using SoftwareVentas.Core.Atributtes;
 using SoftwareVentas.Core.Pagination;
-using SoftwareVentas.Data;
 using SoftwareVentas.Data.Entities;
 using SoftwareVentas.Helpers;
 using SoftwareVentas.Requests;
+using SoftwareVentas.Services;
 
 namespace SoftwareVentas.Controllers
 {
@@ -24,9 +24,8 @@ namespace SoftwareVentas.Controllers
             _notifyService = notifyService;
         }
 
-        // Esta acción ahora es accesible para todos los usuarios autenticados (sin roles específicos)
-        [AllowAnonymous]  // Acceso público para ver la lista de productos
         [HttpGet]
+        [CustomAuthorize(permission: "showProducts", module: "Products")]
         public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
                                                [FromQuery] int? Page,
                                                [FromQuery] string? Filter)
@@ -43,16 +42,15 @@ namespace SoftwareVentas.Controllers
             return View(response.Result);
         }
 
-        // Acción para crear un producto, accesible solo por administradores
-        [Authorize]
         [HttpGet]
+        [CustomAuthorize(permission: "createProducts", module: "Products")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
-        [Authorize]
+        [CustomAuthorize(permission: "createProducts", module: "Products")]
         public async Task<IActionResult> Create(Product product)
         {
             try
@@ -80,9 +78,8 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-        // Acción para editar un producto, accesible solo por administradores
-        [Authorize]
         [HttpGet]
+        [CustomAuthorize(permission: "editProducts", module: "Products")]
         public async Task<IActionResult> Edit([FromRoute] int id)
         {
             Response<Product> response = await _productService.GetOneAsync(id);
@@ -97,7 +94,7 @@ namespace SoftwareVentas.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [CustomAuthorize(permission: "editProducts", module: "Products")]
         public async Task<IActionResult> Edit(Product product)
         {
             try
@@ -126,9 +123,8 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-        // Acción para eliminar un producto, accesible solo por administradores
-        [Authorize]
         [HttpPost]
+        [CustomAuthorize(permission: "deletProducts", module: "Products")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             Response<Product> response = await _productService.DeleteteAsync(id);
@@ -147,6 +143,7 @@ namespace SoftwareVentas.Controllers
 
         // Acción para cambiar el estado del producto (ocultar/mostrar)
         [HttpPost]
+        [CustomAuthorize(permission: "editProducts", module: "Products")]
         public async Task<IActionResult> Toggle(int ProductId, bool Hide)
         {
             ToggleProductStatusRequest request = new ToggleProductStatusRequest

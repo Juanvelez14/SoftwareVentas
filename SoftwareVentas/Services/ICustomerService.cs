@@ -1,92 +1,77 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using SoftwareVentas.Core;
 using SoftwareVentas.Core.Pagination;
 using SoftwareVentas.Data;
 using SoftwareVentas.Data.Entities;
+using SoftwareVentas.DTOs;
 using SoftwareVentas.Helpers;
-using SoftwareVentas.Requests;
-using System.Collections;
-using System.Collections.Generic;
+using System.Reflection.Metadata;
+
 
 namespace SoftwareVentas.Services
 {
     public interface ICustomerService
     {
-        public Task<Response<Customer>> CreateAsync(Customer model);
+        public Task<Response<Customer>> CreateAsync(CustomerDTO dto);
 
-        public Task<Response<Customer>> DeleteteAsync(int id);
-
-        public Task<Response<Customer>> EditAsync(Customer model);
+        public Task<Response<Customer>> EditAsync(CustomerDTO dto);
 
         public Task<Response<PaginationResponse<Customer>>> GetListAsync(PaginationRequest request);
 
         public Task<Response<Customer>> GetOneAsync(int id);
 
-        public Task<Response<Customer>> ToggleAsync(ToggleProductStatusRequest request);
     }
 
     public class CustomerService : ICustomerService
     {
         private readonly DataContext _context;
+        private readonly IConverterHelper _converterHelper;
 
-        public CustomerService(DataContext context)
+        public CustomerService(DataContext context, IConverterHelper converterHelper)
         {
             _context = context;
+            _converterHelper = converterHelper;
         }
 
-        public async Task<Response<Customer>> CreateAsync(Customer model)
+        public async Task<Response<Customer>> CreateAsync(CustomerDTO dto)
         {
             try
             {
-                Customer customer = new Customer
-                {
-                    Name = model.Name,
-                    address = model.address,
-                    mainPhone = model.mainPhone,
-                };
+                Customer customer = _converterHelper.ToCustomer(dto);
 
                 await _context.Customers.AddAsync(customer);
                 await _context.SaveChangesAsync();
 
-                return ResponseHelper<Customer>.MakeResponseSuccess(customer, "Cliente creada con éxito");
+                return ResponseHelper<Customer>.MakeResponseSuccess(customer, "Cliente creado con éxito");
             }
             catch (Exception ex)
             {
                 return ResponseHelper<Customer>.MakeResponseFail(ex);
             }
-
         }
 
-        public async Task<Response<Customer>> DeleteteAsync(int id)
+        public async Task<Response<Customer>> EditAsync(CustomerDTO dto)
         {
             try
             {
-                Response<Customer> response = await GetOneAsync(id);
+                Customer? customer = await _context.Customers.FirstOrDefaultAsync(b => b.idCustomer == dto.idCustomer);
 
-                if (!response.IsSuccess)
+                if (customer is null)
                 {
-                    return response;
+                    return ResponseHelper<Customer>.MakeResponseFail($"No existe cliente con id '{dto.idCustomer}'");
                 }
 
-                _context.Customers.Remove(response.Result);
+                //blog = _converterHelper.ToBlog(dto);
+
+                customer.Name = dto.Name;
+                customer.address = dto.address;
+                customer.mainPhone = dto.mainPhone;
+
+                _context.Customers.Update(customer);
                 await _context.SaveChangesAsync();
 
-                return ResponseHelper<Customer>.MakeResponseSuccess(null, "Cliente eliminado con éxito");
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper<Customer>.MakeResponseFail(ex);
-            }
-        }
-
-        public async Task<Response<Customer>> EditAsync(Customer model)
-        {
-            try
-            {
-                _context.Customers.Update(model);
-                await _context.SaveChangesAsync();
-
-                return ResponseHelper<Customer>.MakeResponseSuccess(model, "Cliente actualizada con éxito");
+                return ResponseHelper<Customer>.MakeResponseSuccess(customer, "Cliente actualizado con éxito");
             }
             catch (Exception ex)
             {
@@ -117,14 +102,13 @@ namespace SoftwareVentas.Services
                     Filter = request.Filter
                 };
 
-                return ResponseHelper<PaginationResponse<Customer>>.MakeResponseSuccess(result, "Clientes obtenidos con éxito");
+                return ResponseHelper<PaginationResponse<Customer>>.MakeResponseSuccess(result, "Clientes obtenidas con éxito");
             }
             catch (Exception ex)
             {
                 return ResponseHelper<PaginationResponse<Customer>>.MakeResponseFail(ex);
             }
         }
-
         public async Task<Response<Customer>> GetOneAsync(int id)
         {
             try
@@ -144,30 +128,7 @@ namespace SoftwareVentas.Services
             }
         }
 
-        public async Task<Response<Customer>> ToggleAsync(ToggleProductStatusRequest request)
-        {
-            try
-            {
-                Response<Customer> response = await GetOneAsync(request.ProductId);
 
-                if (!response.IsSuccess)
-                {
-                    return response;
-                }
-
-                Customer customer = response.Result;
-
-                //product.IsHidden = request.Hide;
-                _context.Customers.Update(customer);
-                await _context.SaveChangesAsync();
-
-                return ResponseHelper<Customer>.MakeResponseSuccess(null, "Cliente actualizado con éxito");
-            }
-            catch (Exception ex)
-            {
-                return ResponseHelper<Customer>.MakeResponseFail(ex);
-            }
-        }
 
     }
 }

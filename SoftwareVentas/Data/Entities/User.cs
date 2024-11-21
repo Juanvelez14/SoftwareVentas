@@ -22,7 +22,7 @@ namespace SoftwareVentas.Data.Entities
 		public string FullName => $"{FirstName} {LastName}";
 		// Agrega la propiedad RoleId
 		[Required(ErrorMessage = "El campo {0} es requerido.")]
-		public string RoleId { get; set; } = null!;
+		public int RoleId { get; set; }
 
 		// Propiedad de navegación opcional hacia el rol
 		public Role Role { get; set; }

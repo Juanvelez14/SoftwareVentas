@@ -33,32 +33,10 @@ namespace SoftwareVentas.DTOs
 		[Required(ErrorMessage = "El campo {0} es requerido.")]
 		public string Email { get; set; } = null!;
 
-		[Required(ErrorMessage = "La contraseña es requerida.")]
-		[DataType(DataType.Password)]
-		public string Password { get; set; } = null!;
-
-		[Required(ErrorMessage = "La confirmación de contraseña es requerida.")]
-		[DataType(DataType.Password)]
-		[Compare("Password", ErrorMessage = "Las contraseñas no coinciden.")]
-		public string ConfirmPassword { get; set; } = null!;
-
 		public string FullName => $"{FirstName} {LastName}";
-		public string RoleId { get; set; }
+		public int RoleId { get; set; }
 
-		public IEnumerable<SelectListItem> Role { get; set; }
+		public IEnumerable<SelectListItem>? Roles { get; set; }
 		// Conversión explícita de UserDTO a User
-		public static explicit operator User(UserDTO dto)
-		{
-			return new User
-			{
-				Id = dto.Id.ToString(), // Asignación directa de Guid
-				Email = dto.Email,
-				FirstName = dto.FirstName,
-				LastName = dto.LastName,
-				Document = dto.Document,
-				PhoneNumber = dto.PhoneNumber
-				// Asignar el resto de las propiedades necesarias
-			};
-		}
 	}
 }

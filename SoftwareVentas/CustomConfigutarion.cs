@@ -22,6 +22,8 @@ namespace SoftwareVentas
                 //configuration.UseSqlServer(builder.Configuration.GetConnectionString("MiConexionLocal"));
             });
 
+            builder.Services.AddHttpContextAccessor();
+
             // Services
             AddServices(builder);
 
@@ -72,18 +74,36 @@ namespace SoftwareVentas
         {
             // Services
             builder.Services.AddScoped<IProductsService, ProductsService>();
+            builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<ICustomerService, CustomerService>();
-            builder.Services.AddScoped<IUsersService, UserService>();
+            builder.Services.AddTransient<SeederDB>();
+            builder.Services.AddScoped<IUsersService, UsersService>();
 
-            // Registrar el seeder
-            builder.Services.AddScoped<UserRolesSeeder>(); // Agregar el seeder
+            //Helpers
+            builder.Services.AddScoped<ICombosHelper, CombosHelper>();
+            builder.Services.AddScoped<IConverterHelper, ConverterHelper>();
         }
 
         public static WebApplication AddCustomWebAppConfiguration(this WebApplication app)
         {
             app.UseNotyf();
 
+            SeedData(app);
+
             return app;
+        }
+
+
+
+        private static void SeedData(WebApplication app)
+        {
+            IServiceScopeFactory scopeFactory = app.Services.GetService<IServiceScopeFactory>();
+
+            using (IServiceScope scope = scopeFactory!.CreateScope())
+            {
+                SeederDB service = scope.ServiceProvider.GetService<SeederDB>();
+                service!.SeedAsync().Wait();
+            }
         }
 
 

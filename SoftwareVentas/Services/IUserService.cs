@@ -1,65 +1,114 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using SoftwareVentas.Core.Pagination;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using SoftwareVentas.Core;
+using SoftwareVentas.Core.Pagination;
 using SoftwareVentas.Data;
 using SoftwareVentas.Data.Entities;
 using SoftwareVentas.DTOs;
 using SoftwareVentas.Helpers;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using ClaimsUser = System.Security.Claims.ClaimsPrincipal;
 
 namespace SoftwareVentas.Services
 {
-	public interface IUsersService
-	{
-		public Task<List<User>> GetAllUsersAsync();
-		public Task<IdentityResult> AddUserAsync(User user, string password);
-		public Task<IdentityResult> ConfirmEmailAsync(User user, string token);
-		public Task<string> GenerateEmailConfirmationTokenAsync(User user);
-        public Task<Core.Response<PaginationResponse<User>>> GetListAsync(PaginationRequest request);
+    public interface IUsersService
+    {
+        public Task<IdentityResult> AddUserAsync(User user, string password);
+        public Task<IdentityResult> ConfirmEmailAsync(User user, string token);
+        public Task<Response<User>> CreateAsync(UserDTO dto);
+        public Task<bool> CurrenUserIsAuthorizedAsync(string permission, string module);
+        public Task<string> GenerateEmailConfirmationTokenAsync(User user);
+        public Task<Response<PaginationResponse<User>>> GetListAsync(PaginationRequest request);
         public Task<User> GetUserAsync(string email);
-		public Task<SignInResult> LoginAsync(LoginDTO dto);
-		public Task LogoutAsync();
-		public Task<IdentityResult> UpdateUserAsync(User user);
-        Task AddToRoleAsync(User user, string roleName);
+        public Task<User> GetUserAsync(Guid id);
+        public Task<SignInResult> LoginAsync(LoginDTO dto);
+        public Task LogoutAsync();
+        public Task<IdentityResult> UpdateUserAsync(User user);
+        public Task<Response<User>> UpdateUserAsync(UserDTO dto);
     }
-	public class UserService : IUsersService
-	{
-		private readonly DataContext _context;
-		private readonly SignInManager<User> _SignInManager;
-		private readonly UserManager<User> _UserManager;
+    public class UsersService : IUsersService
+    {
+        private readonly DataContext _context;
+        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly IConverterHelper _converterHelper;
+        private IHttpContextAccessor _httpContextAccessor;
 
-		public UserService(DataContext context, SignInManager<User> signInManager, UserManager<User> userManager)
-		{
-			_context = context;
-			_signInManager = signInManager;
-			_userManager = userManager;
-		}
-		public async Task<List<User>> GetAllUsersAsync()
-		{
-			return await _context.Users.ToListAsync();
-		}
+        public UsersService(DataContext context, SignInManager<User> signInManager, UserManager<User> userManager, IConverterHelper converterHelper, IHttpContextAccessor httpContextAccessor)
+        {
+            _context = context;
+            _signInManager = signInManager;
+            _userManager = userManager;
+            _converterHelper = converterHelper;
+            _httpContextAccessor = httpContextAccessor;
+        }
 
-		private readonly SignInManager<User> _signInManager;
-		private readonly UserManager<User> _userManager;
+        public async Task<IdentityResult> AddUserAsync(User user, string password)
+        {
+            return await _userManager.CreateAsync(user, password);
+        }
 
+        public async Task<IdentityResult> ConfirmEmailAsync(User user, string token)
+        {
+            return await _userManager.ConfirmEmailAsync(user, token);
+        }
 
-		public async Task<IdentityResult> AddUserAsync(User user, string password)
-		{
-			return await _userManager.CreateAsync(user, password);
-		}
+        public async Task<Response<User>> CreateAsync(UserDTO dto)
+        {
+            try
+            {
+                User user = _converterHelper.ToUser(dto);
+                Guid id = Guid.NewGuid();
+                user.Id = id.ToString();
 
-		public async Task<IdentityResult> ConfirmEmailAsync(User user, string token)
-		{
-			return await _userManager.ConfirmEmailAsync(user, token);
-		}
+                IdentityResult result = await AddUserAsync(user, dto.Document);
 
-		public async Task<string> GenerateEmailConfirmationTokenAsync(User user)
-		{
-			return await _userManager.GenerateEmailConfirmationTokenAsync(user);
-		}
+                // TODO: Ajustar cuando se realize funcionalidad para envío de Email
+                string token = await GenerateEmailConfirmationTokenAsync(user);
+                await ConfirmEmailAsync(user, token);
 
-        public async Task<Core.Response<PaginationResponse<User>>> GetListAsync(PaginationRequest request)
+                return ResponseHelper<User>.MakeResponseSuccess(user, "Usuario creado con éxito");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper<User>.MakeResponseFail(ex);
+            }
+        }
+
+        public async Task<bool> CurrenUserIsAuthorizedAsync(string permision, string module)
+        {
+            ClaimsUser? claimUser = _httpContextAccessor.HttpContext?.User;
+
+            if(claimUser is null)
+            {
+                return false;
+            }
+
+            string? userName = claimUser.Identity.Name;
+
+            User? user = await GetUserAsync(userName);
+
+            if(user is null)
+            {
+                return false;
+            }
+
+            if(user.Role.RoleName == Env.SUPER_ADMIN_ROLE_NAME)
+            {
+                return true;
+            }
+
+            return await _context.Permissions.Include(p => p.RolePermissions)
+                                             .AnyAsync(p => (p.Module == module && p.Name == permision)
+                                                            && p.RolePermissions.Any(rp => rp.RoleId == user.RoleId));
+        }
+
+        public async Task<string> GenerateEmailConfirmationTokenAsync(User user)
+        {
+            return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        }
+
+        public async Task<Response<PaginationResponse<User>>> GetListAsync(PaginationRequest request)
         {
             try
             {
@@ -95,84 +144,54 @@ namespace SoftwareVentas.Services
             }
         }
 
-
         public async Task<User> GetUserAsync(string email)
-		{
-			User? user = await _context.Users.Include(u => u.Role)
-											  .FirstOrDefaultAsync(u => u.Email == email);
-
-			return user;
-		}
-
-		public async Task<SignInResult> LoginAsync(LoginDTO dto)
-		{
-			return await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);
-		}
-
-		public async Task LogoutAsync()
-		{
-			await _signInManager.SignOutAsync();
-		}
-		public async Task<IdentityResult> UpdateUserAsync(User user)
-		{
-			return await _userManager.UpdateAsync(user);
-		}
-		public async Task<DTOs.Response<User>> UpdateUserAsync(UserDTO dto)
-		{
-			try
-			{
-				// Buscar el usuario por su ID
-				User user = await _userManager.FindByIdAsync(dto.Id.ToString());
-				if (user == null)
-				{
-					return new DTOs.Response<User>
-					{
-						Success = false,
-						Message = "User not found."
-					};
-				}
-                // Actualizar las propiedades del usuario con los valores del DTO
-                user.Email = dto.Email;
-				user.FirstName = dto.FirstName;
-				user.LastName = dto.LastName;
-				user.Document = dto.Document;
-				user.PhoneNumber = dto.PhoneNumber;
-				user.RoleId = dto.RoleId;
-				// Actualizar el usuario en la base de datos
-				IdentityResult result = await _userManager.UpdateAsync(user);
-				if (result.Succeeded)
-				{
-					return new DTOs.Response<User>
-					{
-						Success = true,
-						Data = user,
-						Message = "User updated successfully."
-					};
-				}
-				// Si falla la actualización, devolver los errores
-				return new DTOs.Response<User>
-				{
-					Success = false,
-					Message = string.Join(", ", result.Errors.Select(e => e.Description))
-				};
-			}
-			catch (Exception ex)
-			{
-				// Manejar excepciones y devolver un mensaje de error
-				return new DTOs.Response<User>
-				{
-					Success = false,
-					Message = $"An error occurred: {ex.Message}"
-				};
-			}
-		}
-
-        public async Task AddToRoleAsync(User user, string roleName)
         {
-            var result = await _userManager.AddToRoleAsync(user, roleName);
-            if (!result.Succeeded)
+            User? user = await _context.Users.Include(u => u.Role)
+                                             .FirstOrDefaultAsync(u => u.Email == email);
+
+            return user;
+        }
+
+        public async Task<User> GetUserAsync(Guid id)
+        {
+            return await _context.Users.Include(u => u.Role)
+                                             .FirstOrDefaultAsync(u => u.Id == id.ToString());
+        }
+
+        public async Task<SignInResult> LoginAsync(LoginDTO dto)
+        {
+            return await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, false, false);
+        }
+
+        public async Task LogoutAsync()
+        {
+            await _signInManager.SignOutAsync();
+        }
+
+        public async Task<IdentityResult> UpdateUserAsync(User user)
+        {
+            return await _userManager.UpdateAsync(user);
+        }
+        public async Task<Response<User>> UpdateUserAsync(UserDTO dto)
+        {
+            try
             {
-                throw new InvalidOperationException($"No se pudo asignar el rol {roleName} al usuario.");
+                User user = await GetUserAsync(dto.Id);
+                user.PhoneNumber = dto.PhoneNumber;
+                user.Document = dto.Document;
+                user.FirstName = dto.FirstName;
+                user.LastName = dto.LastName;
+                user.RoleId = dto.RoleId;
+
+                _context.Users.Update(user);
+
+                await _context.SaveChangesAsync();
+
+                return ResponseHelper<User>.MakeResponseSuccess(user, "Usuario actualizado con éxito");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper<User>.MakeResponseFail(ex);
             }
         }
     }

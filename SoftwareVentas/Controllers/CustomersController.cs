@@ -1,30 +1,31 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SoftwareVentas.Services;
 using SoftwareVentas.Core;
 using SoftwareVentas.Core.Pagination;
 using SoftwareVentas.Data;
 using SoftwareVentas.Data.Entities;
+using SoftwareVentas.DTOs;
 using SoftwareVentas.Helpers;
-using SoftwareVentas.Requests;
+using SoftwareVentas.Services;
 
 // Here we define the controller
 namespace SoftwareVentas.Controllers
 {
-	[Authorize]
+	
 	public class CustomersController : Controller
     {
         private readonly ICustomerService _customerService;
         private readonly INotyfService _notifyService;
+        private readonly IConverterHelper _converterHelper;
 
-        public CustomersController(ICustomerService customerService, INotyfService notifyService)
+        public CustomersController(ICustomerService customerService, INotyfService notifyService, IConverterHelper converterHelper)
         {
             _customerService = customerService;
             _notifyService = notifyService;
+            _converterHelper = converterHelper;
         }
 
-		[Authorize]
+        [HttpGet]
 		public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
                                                [FromQuery] int? Page,
                                                [FromQuery] string? Filter)
@@ -36,52 +37,51 @@ namespace SoftwareVentas.Controllers
                 Filter = Filter
             };
 
-            Response<PaginationResponse<Customer>> response = await _customerService.GetListAsync(request);
+            Core.Response<PaginationResponse<Customer>> response = await _customerService.GetListAsync(request);
 
 
             return View(response.Result);
         }
 
-		[Authorize]
+		[HttpGet]
 		public IActionResult Create()
         {
+            
             return View();
         }
 
         [HttpPost]
-		[Authorize]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create(Customer customer)
+		public async Task<IActionResult> Create(CustomerDTO dto)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
                     _notifyService.Error("Debe ajustar los errores de validación");
-                    return View(customer);
+                    return View(dto);
                 }
 
-                Response<Customer> response = await _customerService.CreateAsync(customer);
+                Core.Response<Customer> response = await _customerService.CreateAsync(dto);
 
-                if (response.IsSuccess)
+                if (!response.IsSuccess)
                 {
-                    _notifyService.Success(response.Message);
-                    return RedirectToAction(nameof(Index));
+                    _notifyService.Error(response.Message);
+                    return View(dto);
                 }
 
-                _notifyService.Error(response.Message);
-                return View(response);
+                _notifyService.Success(response.Message);
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                return View(customer);
+                return View(dto);
             }
         }
 
-		[Authorize]
+		[HttpGet]
 		public async Task<IActionResult> Edit([FromRoute] int id)
         {
-            Response<Customer> response = await _customerService.GetOneAsync(id);
+            Core.Response<Customer> response = await _customerService.GetOneAsync(id);
 
             if (response.IsSuccess)
             {
@@ -94,19 +94,17 @@ namespace SoftwareVentas.Controllers
 
 
         [HttpPost]
-		[Authorize]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(Customer customer)
+		public async Task<IActionResult> Edit(CustomerDTO dto)
         {
             try
             {
                 if (!ModelState.IsValid)
                 {
                     _notifyService.Error("Debe ajustar los errores de validación");
-                    return View(customer);
+                    return View(dto);
                 }
 
-                Response<Customer> response = await _customerService.EditAsync(customer);
+                Response<Customer> response = await _customerService.EditAsync(dto);
 
                 if (response.IsSuccess)
                 {
@@ -115,53 +113,13 @@ namespace SoftwareVentas.Controllers
                 }
 
                 _notifyService.Error(response.Message);
-                return View(response);
+                return View(dto);
             }
             catch (Exception ex)
             {
                 _notifyService.Error(ex.Message);
-                return View(customer);
+                return View(dto);
             }
-        }
-
-		[Authorize]
-		public async Task<IActionResult> Delete([FromRoute] int id)
-        {
-            Response<Customer> response = await _customerService.DeleteteAsync(id);
-
-            if (response.IsSuccess)
-            {
-                _notifyService.Success(response.Message);
-            }
-            else
-            {
-                _notifyService.Error(response.Message);
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Toggle(int ProductId, bool Hide)
-        {
-            ToggleProductStatusRequest request = new ToggleProductStatusRequest
-            {
-                Hide = Hide,
-                ProductId = ProductId
-            };
-
-            Response<Customer> response = await _customerService.ToggleAsync(request);
-
-            if (response.IsSuccess)
-            {
-                _notifyService.Success(response.Message);
-            }
-            else
-            {
-                _notifyService.Error(response.Message);
-            }
-
-            return RedirectToAction(nameof(Index));
         }
     }
 }

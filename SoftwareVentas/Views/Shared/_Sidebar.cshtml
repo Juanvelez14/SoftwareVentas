@@ -1,4 +1,6 @@
-﻿<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+﻿@inject SoftwareVentas.Services.IUsersService _usersService
+
+<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" asp-controller="Home" asp-action="Index">
@@ -19,37 +21,51 @@
         </a>
     </li>
 
-    <!-- Divider -->
-    <hr class="sidebar-divider">
 
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        Paginas
-    </div>
+    @if (await _usersService.CurrenUserIsAuthorizedAsync("showProducts", "Products"))
+    {
+        <!-- Nav Item - Charts -->
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Products" asp-action="Index">
+                <i class="fas fa-fw fa-tshirt"></i>
+                <span>Products</span>
+            </a>
+        </li>
 
-    <!-- Nav Item - Charts -->
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Products" asp-action="Index">
-            <i class="fas fa-fw fa-tshirt"></i>
-            <span>Products</span>
-        </a>
-    </li>
+    }
+    @if (await _usersService.CurrenUserIsAuthorizedAsync("showCustomers", "Customers"))
+    {
+        <!-- Nav Item - Charts -->
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Customers" asp-action="Index">
+                <i class="fas fa-fw fa-users"></i>
+                <span>Customers</span>
+            </a>
+        </li>
+    }
 
-    <!-- Nav Item - Charts -->
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="Customers" asp-action="Index">
-            <i class="fas fa-fw fa-users"></i>
-            <span>Customers</span>
-        </a>
-    </li>
+    @if (await _usersService.CurrenUserIsAuthorizedAsync("showUsers", "Users"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="User" asp-action="Index">
+                <i class="fas fa-fw fa-user"></i>
+                <span>Users</span>
+            </a>
+        </li>
 
-    <li class="nav-item">
-        <a class="nav-link" asp-controller="User" asp-action="Index">
-            <i class="fas fa-fw fa-user"></i>
-            <span>Users</span>
-        </a>
-    </li>
+    }
 
+    @if (await _usersService.CurrenUserIsAuthorizedAsync("showRoles", "Roles"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Roles" asp-action="Index">
+                <i class="fas fa-fw fa-user"></i>
+                <span>Roles</span>
+            </a>
+        </li>
+
+    }
+   
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">
 

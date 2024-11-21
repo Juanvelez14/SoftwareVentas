@@ -284,8 +284,11 @@ namespace SoftwareVentas.Migrations
 
             modelBuilder.Entity("SoftwareVentas.Data.Entities.Role", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("RoleName")
                         .IsRequired()
@@ -302,8 +305,8 @@ namespace SoftwareVentas.Migrations
 
             modelBuilder.Entity("SoftwareVentas.Data.Entities.RolePermission", b =>
                 {
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
                     b.Property<int>("PermissionId")
                         .HasColumnType("int");
@@ -394,9 +397,8 @@ namespace SoftwareVentas.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");

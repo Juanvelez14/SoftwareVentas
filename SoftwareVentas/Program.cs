@@ -19,10 +19,13 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IRoleService, RoleService>();
 
+builder.Services.AddScoped<PermissionsSeeder>();
+
+builder.Services.AddScoped<UserRolesSeeder>();
 
 var app = builder.Build();
 
-// Llamar al seeder para inicializar los roles y usuarios si es necesario
+// Llamar al seeder para inicializar los roles y usuarios si es necesari
 using (var scope = app.Services.CreateScope())
 {
     var seeder = scope.ServiceProvider.GetRequiredService<UserRolesSeeder>();
@@ -36,6 +39,21 @@ using (var scope = app.Services.CreateScope())
         Console.Error.WriteLine($"Error al inicializar roles y usuarios: {ex.Message}");
     }
 }
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var permissionsSeeder = services.GetRequiredService<PermissionsSeeder>();
+        await permissionsSeeder.SeedAsync(); // Llama al método de poblar
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error al poblar la base de datos: {ex.Message}");
+    }
+}
+
 
 // Configuración de middlewares
 if (app.Environment.IsDevelopment())

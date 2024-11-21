@@ -81,7 +81,7 @@ namespace SoftwareVentas.Data.Seeders
 
                 await _usersService.AddUserAsync(user, "1234");
                 // Asignar el rol al usuario explícitamente
-                await _usersService.AddToRoleAsync(user, "Gestor de contenido");
+                //await _usersService.AddToRoleAsync(user, "Gestor de contenido");
 
                 string token = await _usersService.GenerateEmailConfirmationTokenAsync(user);
                 await _usersService.ConfirmEmailAsync(user, token);
@@ -103,6 +103,14 @@ namespace SoftwareVentas.Data.Seeders
             {
                 Role role = new Role { RoleName = "Gestor de usuarios" };
                 await _context.Roles.AddAsync(role);
+
+                List<Permission> permissions = await _context.Permissions.Where(p => p.Module == "Users").ToListAsync();
+
+                foreach (Permission permission in permissions)
+                {
+                    await _context.RolePermissions.AddAsync(new RolePermission { Permission = permission, Role = role });
+                }
+
                 await _context.SaveChangesAsync();
             }
         }
@@ -115,6 +123,14 @@ namespace SoftwareVentas.Data.Seeders
             {
                 Role role = new Role { RoleName = "Gestor de contenido" };
                 await _context.Roles.AddAsync(role);
+
+                List<Permission> permissions = await _context.Permissions.Where(p => p.Module == "Products" || p.Module == "Customers").ToListAsync();
+
+                foreach (Permission permission in permissions)
+                {
+                    await _context.RolePermissions.AddAsync(new RolePermission { Permission = permission, Role = role });
+                }
+
                 await _context.SaveChangesAsync();
             }
         }

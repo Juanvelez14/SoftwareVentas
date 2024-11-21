@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using SoftwareVentas.Data.Entities;
+using System.ComponentModel.DataAnnotations;
 
-namespace SoftwareVentas.Data.Entities
+namespace SoftwareVentas.DTOs
 {
-    public class Role
+    public class RoleDTO
     {
         [Key]
         public int Id { get; set; }
@@ -12,8 +13,9 @@ namespace SoftwareVentas.Data.Entities
         [Required(ErrorMessage = "El campo '{0}' es requerido.")]
         public string RoleName { get; set; } = null!;
 
-        public ICollection<RolePermission> RolePermissions { get; set; }
+        public List<PermissionForDTO>? Permissions {  get; set; }
 
+        public List<sectionForDTO>? Roles { get; set; }
+        public string? PermissionIds {  get; set; }
     }
-
 }

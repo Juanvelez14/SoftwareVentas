@@ -1,159 +1,224 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Newtonsoft.Json;
+using SoftwareVentas.Core;
+using SoftwareVentas.Core.Pagination;
 using SoftwareVentas.Data;
 using SoftwareVentas.Data.Entities;
+using SoftwareVentas.DTOs;
+using SoftwareVentas.Helpers;
+using static System.Collections.Specialized.BitVector32;
 
 namespace SoftwareVentas.Services
 {
     public interface IRoleService
     {
-        Task<IdentityResult> AssignRoleToUserAsync(string userId, string roleName);
-        Task<IdentityResult> RemoveRoleFromUserAsync(string userId, string roleName);
-        Task<List<IdentityRole>> GetAllRolesAsync();
-        Task<IdentityResult> CreateRoleAsync(string roleName);
-        Task<IdentityResult> DeleteRoleAsync(string roleId);
-        Task<IdentityResult> AssignPermissionToRoleAsync(string roleId, int permissionId);
-        Task<IdentityResult> RemovePermissionFromRoleAsync(string roleId, int permissionId);
-        Task<bool> UserHasPermissionAsync(int userId, string permissionName);
-        Task<List<Permission>> GetPermissionsByRoleIdAsync(string roleId);
+        public Task<Response<Role>> CreateAsync(RoleDTO dto);
+        public Task<Response<Role>> EditAsync(RoleDTO dto);
+        public Task<Response<PaginationResponse<Role>>> GetListAsync(PaginationRequest request);
+        public Task<Response<RoleDTO>> GetOneAsync(int id);
+        public Task<Response<IEnumerable<Permission>>> GetPermissionsAsync();
+        public Task<Response<IEnumerable<PermissionForDTO>>> GetPermissionsByRoleAsync(int id);
+
     }
 
     public class RoleService : IRoleService
     {
-        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly DataContext _context;
-        private readonly UserManager<User> _userManager;
+        private readonly IConverterHelper _converterHelper;
 
-        public async Task<IdentityResult> AssignRoleToUserAsync(string userId, string roleName)
+        public RoleService(DataContext context, IConverterHelper converterHelper)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return IdentityResult.Failed(new IdentityError { Description = "Usuario no encontrado" });
-            }
-
-            var result = await _userManager.AddToRoleAsync(user, roleName);
-            return result;
-        }
-
-        public async Task<IdentityResult> RemoveRoleFromUserAsync(string userId, string roleName)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return IdentityResult.Failed(new IdentityError { Description = "Usuario no encontrado" });
-            }
-
-            var result = await _userManager.RemoveFromRoleAsync(user, roleName);
-            return result;
-        }
-
-        public RoleService(RoleManager<IdentityRole> roleManager, UserManager<User> userManager, DataContext context)
-        {
-            _roleManager = roleManager;
-            _userManager = userManager;  // Aquí se inyecta el UserManager
             _context = context;
+            _converterHelper = converterHelper;
         }
 
-
-        // Método para obtener todos los roles
-        public async Task<List<IdentityRole>> GetAllRolesAsync()
+        public async Task<Response<Role>> CreateAsync(RoleDTO dto)
         {
-            return await _roleManager.Roles.ToListAsync();
-        }
-
-        // Método para crear un nuevo rol
-        public async Task<IdentityResult> CreateRoleAsync(string roleName)
-        {
-            if (await _roleManager.RoleExistsAsync(roleName))
+            using (IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync())
             {
-                return IdentityResult.Failed(new IdentityError { Description = "El rol ya existe" });
+                try
+                {
+                    // Creación del rol
+                    Role role = _converterHelper.ToRole(dto);
+                    await _context.Roles.AddAsync(role);
+
+                    await _context.SaveChangesAsync();
+
+                    int roleId = role.Id;
+
+                    // Inserción de permisos
+                    List<int> permissionIds = new List<int>();
+
+                    if (!string.IsNullOrWhiteSpace(dto.PermissionIds))
+                    {
+                        permissionIds = JsonConvert.DeserializeObject<List<int>>(dto.PermissionIds);
+                    }
+
+                    foreach (int permissionId in permissionIds)
+                    {
+                        RolePermission rolePermission = new RolePermission
+                        {
+                            RoleId = roleId,
+                            PermissionId = permissionId
+                        };
+
+                        await _context.RolePermissions.AddAsync(rolePermission);
+                    }
+
+                
+
+                    await _context.SaveChangesAsync();
+
+                    transaction.Commit();
+
+                    return ResponseHelper<Role>.MakeResponseSuccess(role, "Rol creado con éxito");
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return ResponseHelper<Role>.MakeResponseFail(ex);
+                }
             }
-
-            // Crear un rol de tipo IdentityRole directamente
-            var newRole = new IdentityRole(roleName);
-            return await _roleManager.CreateAsync(newRole);
         }
 
-
-        // Método para eliminar un rol
-        public async Task<IdentityResult> DeleteRoleAsync(string roleId)
+        public async Task<Response<Role>> EditAsync(RoleDTO dto)
         {
-            // Usar directamente roleId como string, no hace falta hacer .ToString()
-            IdentityRole role = await _roleManager.FindByIdAsync(roleId);
+            try
+            {
+                if (dto.RoleName == Env.SUPER_ADMIN_ROLE_NAME)
+                {
+                    return ResponseHelper<Role>.MakeResponseFail($"El role '{Env.SUPER_ADMIN_ROLE_NAME}' no puede ser editado.");
+                }
 
-            if (role != null)
-            {
-                return await _roleManager.DeleteAsync(role);
-            }
+                // Permisos
+                List<int> permissionIds = new List<int>();
 
-            return IdentityResult.Failed(new IdentityError { Description = "Rol no encontrado" });
+                if (!string.IsNullOrWhiteSpace(dto.PermissionIds))
+                {
+                    permissionIds = JsonConvert.DeserializeObject<List<int>>(dto.PermissionIds);
+                }
+
+                // Eliminación de permisos antiguos
+                List<RolePermission> oldRolePermissions = await _context.RolePermissions.Where(rp => rp.RoleId == dto.Id).ToListAsync();
+                _context.RolePermissions.RemoveRange(oldRolePermissions);
+
+                // Inserción de nuevos permisos
+                foreach (int permissionId in permissionIds)
+                {
+                    RolePermission rolePermission = new RolePermission
+                    {
+                        RoleId = dto.Id,
+                        PermissionId = permissionId
+                    };
+
+                    await _context.RolePermissions.AddAsync(rolePermission);
+                }
+
+           
+           
+
+                // Actualización de Rol
+                Role model = _converterHelper.ToRole(dto);
+                _context.Roles.Update(model);
+
+                await _context.SaveChangesAsync();
+
+                return ResponseHelper<Role>.MakeResponseSuccess(model, "Rol actualizado con éxito");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper<Role>.MakeResponseFail(ex);
+            }
         }
 
-        // Asignar un permiso a un rol
-        public async Task<IdentityResult> AssignPermissionToRoleAsync(string roleId, int permissionId)
+        public async Task<Response<PaginationResponse<Role>>> GetListAsync(PaginationRequest request)
         {
-            var role = await _context.Roles.FindAsync(roleId);
-            if (role == null)
+            try
             {
-                return IdentityResult.Failed(new IdentityError { Description = "Rol no encontrado" });
+                IQueryable<Role> query = _context.Roles.AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(request.Filter))
+                {
+                    query = query.Where(s => s.RoleName.ToLower().Contains(request.Filter.ToLower()));
+                }
+
+                PagedList<Role> list = await PagedList<Role>.ToPagedListAsync(query, request);
+
+                PaginationResponse<Role> result = new PaginationResponse<Role>
+                {
+                    List = list,
+                    TotalCount = list.TotalCount,
+                    RecordsPerPage = list.RecordsPerPage,
+                    CurrentPage = list.CurrentPage,
+                    TotalPages = list.TotalPages,
+                    Filter = request.Filter
+                };
+
+                return ResponseHelper<PaginationResponse<Role>>.MakeResponseSuccess(result, "Roles obtenidas con éxito");
             }
-            var permission = await _context.Permissions.FindAsync(permissionId);
-            if (permission == null)
+            catch (Exception ex)
             {
-                return IdentityResult.Failed(new IdentityError { Description = "Permiso no encontrado" });
+                return ResponseHelper<PaginationResponse<Role>>.MakeResponseFail(ex);
             }
-            var rolePermission = new RolePermission
-            {
-                RoleId = roleId.ToString(),
-                PermissionId = permissionId
-            };
-            _context.RolePermissions.Add(rolePermission);
-            await _context.SaveChangesAsync();
-            return IdentityResult.Success;
         }
-        // Eliminar un permiso de un rol
-        public async Task<IdentityResult> RemovePermissionFromRoleAsync(string roleId, int permissionId)
+
+        public async Task<Response<RoleDTO>> GetOneAsync(int id)
         {
-            var rolePermission = await _context.RolePermissions
-                                               .FirstOrDefaultAsync(rp => rp.RoleId == roleId.ToString() && rp.PermissionId == permissionId);
-            if (rolePermission == null)
+            try
             {
-                return IdentityResult.Failed(new IdentityError { Description = "Relación de permiso no encontrada" });
+                Role? role = await _context.Roles.FirstOrDefaultAsync(s => s.Id == id);
+
+                if (role is null)
+                {
+                    return ResponseHelper<RoleDTO>.MakeResponseFail("El Role con el id indicado no existe");
+                }
+
+                return ResponseHelper<RoleDTO>.MakeResponseSuccess(await _converterHelper.ToRoleDTOAsync(role));
             }
-            _context.RolePermissions.Remove(rolePermission);
-            await _context.SaveChangesAsync();
-            return IdentityResult.Success;
-        }
-        // Verificar si un usuario tiene un permiso
-        public async Task<bool> UserHasPermissionAsync(int userId, string permissionName)
-        {
-            // Obtener el usuario por su ID
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null)
-                return false;
-            // Obtener los roles del usuario
-            var userRoles = await _userManager.GetRolesAsync(user);
-            // Buscar permisos asociados a los roles
-            var rolesWithPermission = await _context.Roles
-                                                    .Where(r => userRoles.Contains(r.RoleName))
-                                                    .SelectMany(r => r.RolePermissions)
-                                                    .Where(rp => rp.Permission.Name == permissionName)
-                                                    .ToListAsync();
-            return rolesWithPermission.Any();
-        }
-        // Obtener los permisos de un rol
-        public async Task<List<Permission>> GetPermissionsByRoleIdAsync(string roleId)
-        {
-            var role = await _context.Roles
-                                     .Include(r => r.RolePermissions)
-                                     .ThenInclude(rp => rp.Permission)
-                                     .FirstOrDefaultAsync(r => r.Id == roleId.ToString());
-            if (role == null)
+            catch (Exception ex)
             {
-                return new List<Permission>();
+                return ResponseHelper<RoleDTO>.MakeResponseFail(ex);
             }
-            return role.RolePermissions.Select(rp => rp.Permission).ToList();
         }
+
+        public async Task<Response<IEnumerable<Permission>>> GetPermissionsAsync()
+        {
+            try
+            {
+                IEnumerable<Permission> permissions = await _context.Permissions.ToListAsync();
+
+                return ResponseHelper<IEnumerable<Permission>>.MakeResponseSuccess(permissions);
+            }catch (Exception ex)
+            {
+                return ResponseHelper<IEnumerable<Permission>>.MakeResponseFail(ex);
+            }
+        }
+
+        public async Task<Response<IEnumerable<PermissionForDTO>>> GetPermissionsByRoleAsync(int id)
+        {
+            try
+            {
+                Response<RoleDTO> response = await GetOneAsync(id);
+
+                if (!response.IsSuccess)
+                {
+                    return ResponseHelper<IEnumerable<PermissionForDTO>>.MakeResponseFail(response.Message);
+                }
+
+                List<PermissionForDTO> permissions = response.Result.Permissions;
+
+                return ResponseHelper<IEnumerable<PermissionForDTO>>.MakeResponseSuccess(permissions);
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper<IEnumerable<PermissionForDTO>>.MakeResponseFail(ex);
+            }
+        }
+
+      
+
+       
     }
 }
