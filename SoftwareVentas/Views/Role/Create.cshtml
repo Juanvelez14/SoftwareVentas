@@ -1,0 +1,79 @@
+﻿@{
+    ViewData["Title"] = "Gestión de Roles y Permisos";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<!-- Formulario para Crear Rol -->
+<h3>Crear un Nuevo Rol</h3>
+<form asp-action="CreateRole" method="post">
+    <div class="form-group">
+        <label for="roleName">Nombre del Rol</label>
+        <input type="text" class="form-control" id="roleName" name="roleName" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Crear Rol</button>
+</form>
+
+<hr />
+
+<!-- Formulario para Asignar un Rol a un Usuario -->
+<h3>Asignar un Rol a un Usuario</h3>
+<form asp-action="AssignRole" method="post">
+    <div class="form-group">
+        <label for="userId">ID del Usuario</label>
+        <input type="text" class="form-control" id="userId" name="userId" required />
+    </div>
+    <div class="form-group">
+        <label for="roleName">Nombre del Rol</label>
+        <input type="text" class="form-control" id="roleName" name="roleName" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Asignar Rol</button>
+</form>
+
+<hr />
+
+<!-- Formulario para Eliminar un Rol de un Usuario -->
+<h3>Eliminar un Rol de un Usuario</h3>
+<form asp-action="RemoveRole" method="post">
+    <div class="form-group">
+        <label for="userIdToRemove">ID del Usuario</label>
+        <input type="text" class="form-control" id="userIdToRemove" name="userId" required />
+    </div>
+    <div class="form-group">
+        <label for="roleNameToRemove">Nombre del Rol</label>
+        <input type="text" class="form-control" id="roleNameToRemove" name="roleName" required />
+    </div>
+    <button type="submit" class="btn btn-danger">Eliminar Rol</button>
+</form>
+
+<hr />
+
+<!-- Formulario para Asignar un Permiso a un Rol -->
+<h3>Asignar un Permiso a un Rol</h3>
+<form asp-action="AssignPermissionToRole" method="post">
+    <div class="form-group">
+        <label for="roleId">ID del Rol</label>
+        <input type="text" class="form-control" id="roleId" name="roleId" required />
+    </div>
+    <div class="form-group">
+        <label for="permissionId">ID del Permiso</label>
+        <input type="number" class="form-control" id="permissionId" name="permissionId" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Asignar Permiso</button>
+</form>
+
+<hr />
+
+<!-- Formulario para Eliminar un Permiso de un Rol -->
+<h3>Eliminar un Permiso de un Rol</h3>
+<form asp-action="RemovePermissionFromRole" method="post">
+    <div class="form-group">
+        <label for="roleIdToRemove">ID del Rol</label>
+        <input type="text" class="form-control" id="roleIdToRemove" name="roleId" required />
+    </div>
+    <div class="form-group">
+        <label for="permissionIdToRemove">ID del Permiso</label>
+        <input type="number" class="form-control" id="permissionIdToRemove" name="permissionId" required />
+    </div>
+    <button type="submit" class="btn btn-danger">Eliminar Permiso</button>
+</form>

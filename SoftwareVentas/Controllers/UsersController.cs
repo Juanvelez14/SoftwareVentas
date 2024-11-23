@@ -66,6 +66,14 @@ namespace SoftwareVentas.Controllers
                 {
                     _notifyService.Error("Debe ajustar los errores de validación");
                     dto.Roles = await _combosHelper.GetComboSoftwareVentasRolesAsync();
+                    foreach (var key in ModelState.Keys)
+                    {
+                        var state = ModelState[key];
+                        foreach (var error in state.Errors)
+                        {
+                            Console.WriteLine($"Propiedad: {key}, Error: {error.ErrorMessage}");
+                        }
+                    }
                     return View(dto);
                 }
 
