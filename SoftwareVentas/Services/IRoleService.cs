@@ -168,6 +168,7 @@ namespace SoftwareVentas.Services
         {
             try
             {
+                // Obtén el rol desde la base de datos
                 Role? role = await _context.Roles.FirstOrDefaultAsync(s => s.Id == id);
 
                 if (role is null)
@@ -175,7 +176,30 @@ namespace SoftwareVentas.Services
                     return ResponseHelper<RoleDTO>.MakeResponseFail("El Role con el id indicado no existe");
                 }
 
-                return ResponseHelper<RoleDTO>.MakeResponseSuccess(await _converterHelper.ToRoleDTOAsync(role));
+                // Cargar permisos relacionados
+                var rolePermissions = await _context.RolePermissions
+                    .Where(rp => rp.RoleId == role.Id)
+                    .Select(rp => rp.PermissionId)
+                    .ToListAsync();
+
+                // Obtener todos los permisos y marcar los seleccionados
+                var permissions = await _context.Permissions.Select(p => new PermissionForDTO
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Descripcion = p.Descripcion,
+                    Selected = rolePermissions.Contains(p.Id),
+                }).ToListAsync();
+
+                // Crear el DTO y devolverlo
+                RoleDTO roleDTO = new RoleDTO
+                {
+                    Id = role.Id,
+                    RoleName = role.RoleName,
+                    Permissions = permissions,
+                };
+
+                return ResponseHelper<RoleDTO>.MakeResponseSuccess(roleDTO);
             }
             catch (Exception ex)
             {
