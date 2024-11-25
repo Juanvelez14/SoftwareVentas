@@ -17,6 +17,10 @@ namespace SoftwareVentas.Helpers
         public Task<RoleDTO> ToRoleDTOAsync(Role role);
         public User ToUser(UserDTO dto);
         public Task<UserDTO> ToUserDTOAsync(User user, bool isNew = true);
+        public Employee ToEmployee(EmployeeDTO dto);
+        public EmployeeDTO ToEmployeeDTO(Employee result);
+        public Sale ToSale(SaleForCreationDTO dto);
+        public SaleDTO ToSaleDTO(Sale result);
     }
 
     public class ConverterHelper : IConverterHelper
@@ -57,6 +61,26 @@ namespace SoftwareVentas.Helpers
 
         }
 
+        public Employee ToEmployee(EmployeeDTO dto)
+        {
+            return new Employee
+            {
+                Id = dto.Id,
+                Name = dto.Name,
+                RoleId = dto.RoleId
+            };
+        }
+
+        public EmployeeDTO ToEmployeeDTO(Employee employee)
+        {
+            return new EmployeeDTO
+            {
+                Id = employee.Id,
+                Name = employee.Name,
+                RoleId = employee.RoleId
+            };
+        }
+
         public Role ToRole(RoleDTO dto)
         {
             return new Role
@@ -81,6 +105,27 @@ namespace SoftwareVentas.Helpers
                 Id = role.Id,
                 RoleName = role.RoleName,
                 Permissions = permissions,
+            };
+        }
+
+        public Sale ToSale(SaleForCreationDTO dto)
+        {
+            return new Sale
+            {
+                SaleDate = dto.SaleDate,
+                CustomerId = dto.CustomerId,
+                EmployeeId = dto.EmployeeId
+            };
+        }
+
+        public SaleDTO ToSaleDTO(Sale sale)
+        {
+            return new SaleDTO
+            {
+                Id = sale.Id,
+                SaleDate = sale.SaleDate,
+                CustomerId = sale.CustomerId,
+                EmployeeId = sale.EmployeeId
             };
         }
 
