@@ -1,5 +1,8 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SoftwareVentas.Core.Pagination;
+using SoftwareVentas.Data.Entities;
 using SoftwareVentas.Models;
 
 namespace SoftwareVentas.Controllers
@@ -13,6 +16,8 @@ namespace SoftwareVentas.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
+        [Authorize]
         public IActionResult Index()
         {
             return View();

@@ -12,8 +12,8 @@ using SoftwareVentas.Data;
 namespace SoftwareVentas.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241124152850_BDmigrations")]
-    partial class BDmigrations
+    [Migration("20241125235702_primera")]
+    partial class primera
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

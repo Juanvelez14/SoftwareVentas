@@ -32,8 +32,7 @@ namespace SoftwareVentas.DTOs
 		[EmailAddress(ErrorMessage = "El campo {0} debe ser un Email valido")]
 		[Required(ErrorMessage = "El campo {0} es requerido.")]
 		public string Email { get; set; } = null!;
-
-		public string FullName => $"{FirstName} {LastName}";
+        public string FullName => $"{FirstName} {LastName}";
 		public int RoleId { get; set; }
 
 		public IEnumerable<SelectListItem>? Roles { get; set; }
