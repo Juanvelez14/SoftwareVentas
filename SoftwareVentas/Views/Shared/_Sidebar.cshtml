@@ -65,6 +65,27 @@
         </li>
 
     }
+    @if (await _usersService.CurrenUserIsAuthorizedAsync("showEmployees", "Employees"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Employees" asp-action="Index">
+                <i class="fas fa-fw fa-user"></i>
+                <span>Employees</span>
+            </a>
+        </li>
+
+    }
+
+    @if (await _usersService.CurrenUserIsAuthorizedAsync("showSales", "Sales"))
+    {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Sales" asp-action="Index">
+                <i class="fas fa-fw fa-user"></i>
+                <span>Sales</span>
+            </a>
+        </li>
+
+    }
    
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">

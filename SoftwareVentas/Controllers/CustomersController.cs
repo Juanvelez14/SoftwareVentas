@@ -1,6 +1,7 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using SoftwareVentas.Core;
+using SoftwareVentas.Core.Atributtes;
 using SoftwareVentas.Core.Pagination;
 using SoftwareVentas.Data;
 using SoftwareVentas.Data.Entities;
@@ -26,7 +27,8 @@ namespace SoftwareVentas.Controllers
         }
 
         [HttpGet]
-		public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
+        [CustomAuthorize(permission: "showCustomers", module: "Customers")]
+        public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
                                                [FromQuery] int? Page,
                                                [FromQuery] string? Filter)
         {
@@ -43,7 +45,8 @@ namespace SoftwareVentas.Controllers
             return View(response.Result);
         }
 
-		[HttpGet]
+        [CustomAuthorize(permission: "createCustomers", module: "Customers")]
+        [HttpGet]
 		public IActionResult Create()
         {
             
@@ -51,7 +54,8 @@ namespace SoftwareVentas.Controllers
         }
 
         [HttpPost]
-		public async Task<IActionResult> Create(CustomerDTO dto)
+        [CustomAuthorize(permission: "createCustomers", module: "Customers")]
+        public async Task<IActionResult> Create(CustomerDTO dto)
         {
             try
             {
@@ -79,7 +83,8 @@ namespace SoftwareVentas.Controllers
         }
 
 		[HttpGet]
-		public async Task<IActionResult> Edit([FromRoute] int id)
+        [CustomAuthorize(permission: "editCustomers", module: "Customers")]
+        public async Task<IActionResult> Edit([FromRoute] int id)
         {
             Core.Response<Customer> response = await _customerService.GetOneAsync(id);
 
@@ -94,7 +99,8 @@ namespace SoftwareVentas.Controllers
 
 
         [HttpPost]
-		public async Task<IActionResult> Edit(CustomerDTO dto)
+        [CustomAuthorize(permission: "editCustomers", module: "Customers")]
+        public async Task<IActionResult> Edit(CustomerDTO dto)
         {
             try
             {

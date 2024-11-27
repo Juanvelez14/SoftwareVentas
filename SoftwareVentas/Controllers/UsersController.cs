@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using SoftwareVentas.Core;
+using SoftwareVentas.Core.Atributtes;
 using SoftwareVentas.Core.Pagination;
 using SoftwareVentas.Data.Entities;
 using SoftwareVentas.DTOs;
@@ -13,7 +14,6 @@ using System.Data;
 
 namespace SoftwareVentas.Controllers
 {
-	[Authorize]
 	public class UserController : Controller
 	{
 		private readonly IUsersService _usersService;
@@ -31,6 +31,7 @@ namespace SoftwareVentas.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize(permission: "showUsers", module: "Users")]
         public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
                                                [FromQuery] int? Page,
                                                [FromQuery] string? Filter)
@@ -47,6 +48,7 @@ namespace SoftwareVentas.Controllers
         }
 
         [HttpGet]
+        [CustomAuthorize(permission: "createUsers", module: "Users")]
         public async Task<IActionResult> Create()
         {
             UserDTO dto = new UserDTO
@@ -58,7 +60,8 @@ namespace SoftwareVentas.Controllers
         }
 
         [HttpPost]
-		public async Task<IActionResult> Create(UserDTO dto)
+        [CustomAuthorize(permission: "createUsers", module: "Users")]
+        public async Task<IActionResult> Create(UserDTO dto)
 		{
             try
             {
@@ -97,7 +100,8 @@ namespace SoftwareVentas.Controllers
 
         }
 		[HttpGet]
-		public async Task<IActionResult> Edit(Guid id)
+        [CustomAuthorize(permission: "editUsers", module: "Users")]
+        public async Task<IActionResult> Edit(Guid id)
 		{
             if (Guid.Empty.Equals(id))
             {
@@ -116,7 +120,8 @@ namespace SoftwareVentas.Controllers
         }
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(UserDTO dto)
+        [CustomAuthorize(permission: "editUsers", module: "Users")]
+        public async Task<IActionResult> Edit(UserDTO dto)
 		{
             if (!ModelState.IsValid)
             {

@@ -1,0 +1,36 @@
+﻿@using SoftwareVentas.DTOs
+@model EmployeeDTO
+
+
+@{
+    ViewData["Title"] = ViewData["Title"] ?? "Nuevo Empleado"; // Manejo de nulos
+}
+
+<h1>Nuevo Empleado</h1>
+
+
+
+<form asp-action="Create" method="POST">
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input type="text" class="form-control" asp-for="Name" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+
+    <div class="mb-3">
+        <label class="form-label">Rol</label>
+        <select class="form-control" asp-for="RoleId" asp-items="Model.Roles">
+            <option value="">Seleccione un rol</option>
+        </select>
+        <span asp-validation-for="RoleId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

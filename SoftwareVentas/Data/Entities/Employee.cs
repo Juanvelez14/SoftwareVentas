@@ -14,5 +14,6 @@ namespace SoftwareVentas.Data.Entities
         [Required(ErrorMessage = "El campo '{0}' es requerido.")]
 
         public int RoleId { get; set; }
+        public Role Role { get; set; }
     }
 }

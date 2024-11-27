@@ -73,6 +73,8 @@ namespace SoftwareVentas
         public static void AddServices(WebApplicationBuilder builder)
         {
             // Services
+            builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+            builder.Services.AddScoped<ISaleService, SaleService>();
             builder.Services.AddScoped<IProductsService, ProductsService>();
             builder.Services.AddScoped<IRoleService, RoleService>();
             builder.Services.AddScoped<ICustomerService, CustomerService>();

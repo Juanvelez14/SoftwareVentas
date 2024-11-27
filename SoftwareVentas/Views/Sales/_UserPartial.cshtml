@@ -1,0 +1,29 @@
+﻿@using SoftwareVentas.DTOs
+@model SaleDTO
+
+<div class="row">
+    <div class="col-md-6">
+
+        <div class="form-floating mt-2">
+            <input asp-for="SaleDate" class="form-control" placeholder="@Html.DisplayFor(model => model.SaleDate)">
+            <label asp-for="SaleDate"></label>
+            <span asp-validation-for="SaleDate" class="text-danger"></span>
+        </div>
+
+
+    <div class="col-md-4">
+        <div class="form-floating mt-2">
+            <select asp-for="CustomerId" asp-items="Model.Customers" class="form-control"></select>
+                <label asp-for="CustomerId">Rol</label>
+                <span asp-validation-for="CustomerId" class="text-danger"></span>
+        </div>
+    </div>
+
+        <div class="col-md-4">
+            <div class="form-floating mt-2">
+                <select asp-for="EmployeeId" asp-items="Model.Employees" class="form-control"></select>
+                <label asp-for="EmployeeId">Rol</label>
+                <span asp-validation-for="EmployeeId" class="text-danger"></span>
+            </div>
+        </div>
+</div>

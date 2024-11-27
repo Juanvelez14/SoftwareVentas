@@ -12,8 +12,8 @@ using SoftwareVentas.Data;
 namespace SoftwareVentas.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20241125235702_primera")]
-    partial class primera
+    [Migration("20241127182123_Primera")]
+    partial class Primera
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -223,6 +223,8 @@ namespace SoftwareVentas.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("Employees");
                 });
@@ -480,6 +482,17 @@ namespace SoftwareVentas.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SoftwareVentas.Data.Entities.Employee", b =>
+                {
+                    b.HasOne("SoftwareVentas.Data.Entities.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("SoftwareVentas.Data.Entities.RolePermission", b =>

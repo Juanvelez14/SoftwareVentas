@@ -12,10 +12,11 @@ namespace SoftwareVentas.Data.Entities
 
         [Required(ErrorMessage = "El campo '{0}' es requerido.")]
         public int CustomerId { get; set; }
+        public Customer Customer { get; set; }
 
         [Required(ErrorMessage = "El campo '{0}' es requerido.")]
         public int EmployeeId { get; set; }
-
+        public Employee Employee { get; set; }
 
     }
 }

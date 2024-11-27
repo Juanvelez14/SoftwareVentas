@@ -12,7 +12,7 @@ namespace SoftwareVentas.Services
     public interface IEmployeeService
     {
         public Task<Response<Employee>> CreateAsync(EmployeeDTO dto);
-        Task<Response<bool>> DeleteAsync(int id);
+        Task<Response<Employee>> DeleteAsync(int id);
         public Task<Response<Employee>> EditAsync(EmployeeDTO dto);
 
         public Task<Response<PaginationResponse<Employee>>> GetListAsync(PaginationRequest request);
@@ -48,9 +48,26 @@ namespace SoftwareVentas.Services
             }
         }
 
-        public Task<Response<bool>> DeleteAsync(int id)
+        public async Task<Response<Employee>> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Response<Employee> response = await GetOneAsync(id);
+
+                if (!response.IsSuccess)
+                {
+                    return response;
+                }
+
+                _context.Employees.Remove(response.Result);
+                await _context.SaveChangesAsync();
+
+                return ResponseHelper<Employee>.MakeResponseSuccess(null, "Producto eliminada con éxito");
+            }
+            catch (Exception ex)
+            {
+                return ResponseHelper<Employee>.MakeResponseFail(ex);
+            }
         }
 
         public async Task<Response<Employee>> EditAsync(EmployeeDTO dto)
@@ -82,7 +99,7 @@ namespace SoftwareVentas.Services
         {
             try
             {
-                IQueryable<Employee> query = _context.Employees.AsQueryable();
+                IQueryable<Employee> query = _context.Employees.AsQueryable().Include(u => u.Role);
 
                 if (!string.IsNullOrWhiteSpace(request.Filter))
                 {

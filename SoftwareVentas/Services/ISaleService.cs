@@ -106,7 +106,7 @@ namespace SoftwareVentas.Services
         {
             try
             {
-                IQueryable<Sale> query = _context.Sales.AsQueryable();
+                IQueryable<Sale> query = _context.Sales.AsQueryable().Include(u => u.Employee).Include(u => u.Customer);
 
                 if (!string.IsNullOrWhiteSpace(request.Filter))
                 {

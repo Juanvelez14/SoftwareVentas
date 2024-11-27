@@ -16,7 +16,7 @@ namespace SoftwareVentas.Data.Seeders
 
         public async Task SeedAsync()
         {
-            List<Permission> permissions = [.. Customers(), .. Products(), .. Users(), .. Roles()];
+            List<Permission> permissions = [.. Customers(), .. Products(), .. Users(), .. Roles(), .. Employees(), .. Sales()];
 
             foreach (Permission permission in permissions)
             {
@@ -73,6 +73,28 @@ namespace SoftwareVentas.Data.Seeders
                 new Permission { Name = "createRoles", Descripcion = "Crear Roles", Module = "Roles" },
                 new Permission { Name = "updateRoles", Descripcion = "Editar Roles", Module = "Roles" },
                 new Permission { Name = "deleteRoles", Descripcion = "Eliminar Roles", Module = "Roles" },
+            };
+        }
+
+        private List<Permission> Employees()
+        {
+            return new List<Permission>
+            {
+                new Permission { Name = "showEmployees", Descripcion = "Ver Empleados", Module = "Employees" },
+                new Permission { Name = "createEmployees", Descripcion = "Crear Empleados", Module = "Employees" },
+                new Permission { Name = "editEmployees", Descripcion = "Editar Empleados", Module = "Employees" },
+                new Permission { Name = "deleteEmployees", Descripcion = "Eliminar Empleados", Module = "Employees" },
+            };
+        }
+
+        private List<Permission> Sales()
+        {
+            return new List<Permission>
+            {
+                new Permission { Name = "showSales", Descripcion = "Ver Ventas", Module = "Sales" },
+                new Permission { Name = "createSales", Descripcion = "Crear Ventas", Module = "Sales" },
+                new Permission { Name = "editSales", Descripcion = "Editar Ventas", Module = "Sales" },
+                new Permission { Name = "deleteSales", Descripcion = "Eliminar Ventas", Module = "Sales" },
             };
         }
 

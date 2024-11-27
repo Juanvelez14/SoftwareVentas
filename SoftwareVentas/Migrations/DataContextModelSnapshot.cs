@@ -221,6 +221,8 @@ namespace SoftwareVentas.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RoleId");
+
                     b.ToTable("Employees");
                 });
 
@@ -477,6 +479,17 @@ namespace SoftwareVentas.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SoftwareVentas.Data.Entities.Employee", b =>
+                {
+                    b.HasOne("SoftwareVentas.Data.Entities.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("SoftwareVentas.Data.Entities.RolePermission", b =>

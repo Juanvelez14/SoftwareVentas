@@ -1,9 +1,11 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using SoftwareVentas.Core;
+using SoftwareVentas.Core.Atributtes;
 using SoftwareVentas.Core.Pagination;
 using SoftwareVentas.Data.Entities;
 using SoftwareVentas.DTOs;
+using SoftwareVentas.Helpers;
 using SoftwareVentas.Services;
 
 namespace SoftwareVentas.Controllers
@@ -12,15 +14,19 @@ namespace SoftwareVentas.Controllers
     {
         private readonly ISaleService _saleService;
         private readonly INotyfService _notifyService;
+        private readonly ICombosHelper _combosHelper;
 
-        public SalesController(ISaleService saleService, INotyfService notifyService)
+        public SalesController(ISaleService saleService, INotyfService notifyService, ICombosHelper combosHelper)
         {
             _saleService = saleService;
             _notifyService = notifyService;
+            _combosHelper = combosHelper;
         }
 
         // Acción para listar las ventas con paginación y filtros
         [HttpGet]
+        [CustomAuthorize(permission: "showSales", module: "Sales")]
+
         public async Task<IActionResult> Index([FromQuery] int? RecordsPerPage,
                                                [FromQuery] int? Page,
                                                [FromQuery] string? Filter)
@@ -45,13 +51,23 @@ namespace SoftwareVentas.Controllers
 
         // Acción para mostrar la vista de creación de venta
         [HttpGet]
-        public IActionResult Create()
+        [CustomAuthorize(permission: "createSales", module: "Sales")]
+        public async Task<IActionResult> Create()
         {
-            return View();
+            ViewData["Title"] = "Nuevo Empleado";
+
+            var dto = new SaleDTO
+            {
+                Customers = await _combosHelper.GetComboSoftwareVentasCustomersAsync(),
+                Employees = await _combosHelper.GetComboSoftwareVentasEmployeesAsync()
+            };
+
+            return View(dto);
         }
 
         // Acción para crear una nueva venta
         [HttpPost]
+        [CustomAuthorize(permission: "createSales", module: "Sales")]
         public async Task<IActionResult> Create(SaleForCreationDTO dto)
         {
             try
@@ -82,6 +98,7 @@ namespace SoftwareVentas.Controllers
 
         // Acción para mostrar la vista de edición de venta
         [HttpGet]
+        [CustomAuthorize(permission: "editSales", module: "Sales")]
         public async Task<IActionResult> Edit([FromRoute] int id)
         {
             Core.Response<Sale> response = await _saleService.GetOneAsync(id);
@@ -100,11 +117,15 @@ namespace SoftwareVentas.Controllers
                 EmployeeId = response.Result.EmployeeId
             };
 
+            dto.Customers = await _combosHelper.GetComboSoftwareVentasCustomersAsync();
+            dto.Employees = await _combosHelper.GetComboSoftwareVentasEmployeesAsync();
+
             return View(dto);
         }
 
         // Acción para editar una venta existente
         [HttpPost]
+        [CustomAuthorize(permission: "editSales", module: "Sales")]
         public async Task<IActionResult> Edit(SaleDTO dto)
         {
             try
@@ -135,6 +156,7 @@ namespace SoftwareVentas.Controllers
 
         // Acción para eliminar una venta
         [HttpPost]
+        [CustomAuthorize(permission: "deleteSales", module: "Sales")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             try
