@@ -123,23 +123,21 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-        [HttpPost]
-        [CustomAuthorize(permission: "deletProducts", module: "Products")]
+        [HttpGet]
+        [CustomAuthorize(permission: "deleteProducts", module: "Products")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            Response<Product> response = await _productService.DeleteteAsync(id);
+            //Core.Response<Customer> response = await _customerService.GetOneAsync(id);
+            var response = await _productService.DeleteteAsync(id);
 
             if (response.IsSuccess)
             {
-                _notifyService.Success(response.Message);
-            }
-            else
-            {
-                _notifyService.Error(response.Message);
+                return RedirectToAction(nameof(Index));
             }
 
+            _notifyService.Error(response.Message);
             return RedirectToAction(nameof(Index));
-        }
+        }       
 
         // Acción para cambiar el estado del producto (ocultar/mostrar)
         [HttpPost]

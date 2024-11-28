@@ -41,9 +41,12 @@
                 <td>@product.Discount</td>
                 <td>
                     <a class="btn btn-warning" asp-action="Edit" method="POST" asp-route-id="@product.idProduct">Edit</a>
-                    <form asp-action="Delete" asp-route-id="@product.idProduct" method="POST" style="display: contents;">
+
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@product.idProduct">Eliminar</a>
+
+                    @*<form asp-action="Delete" asp-route-id="@product.idProduct" method="POST" style="display: contents;">
                         <button class="btn btn-danger btnDelete">Eliminar</button>
-                    </form>
+                    </form>*@
                 </td>
             </tr>
         }

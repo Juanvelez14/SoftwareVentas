@@ -21,6 +21,8 @@ namespace SoftwareVentas.Services
 
         public Task<Response<Customer>> GetOneAsync(int id);
 
+        public Task<Response<Customer>> DeleteAsync(int id);
+
     }
 
     public class CustomerService : ICustomerService
@@ -61,8 +63,6 @@ namespace SoftwareVentas.Services
                 {
                     return ResponseHelper<Customer>.MakeResponseFail($"No existe cliente con id '{dto.idCustomer}'");
                 }
-
-                //blog = _converterHelper.ToBlog(dto);
 
                 customer.Name = dto.Name;
                 customer.address = dto.address;
@@ -109,6 +109,7 @@ namespace SoftwareVentas.Services
                 return ResponseHelper<PaginationResponse<Customer>>.MakeResponseFail(ex);
             }
         }
+
         public async Task<Response<Customer>> GetOneAsync(int id)
         {
             try
@@ -128,7 +129,32 @@ namespace SoftwareVentas.Services
             }
         }
 
+        // Implementación del método DeleteAsync
+        public async Task<Response<Customer>> DeleteAsync(int id)
+        {
+            try
+            {
+                // Buscar el cliente por ID
+                var customer = await _context.Customers.FirstOrDefaultAsync(c => c.idCustomer == id);
 
+                // Si no se encuentra, devolver un error
+                if (customer == null)
+                {
+                    return ResponseHelper<Customer>.MakeResponseFail("Cliente no encontrado");
+                }
 
+                // Eliminar el cliente
+                _context.Customers.Remove(customer);
+                await _context.SaveChangesAsync(); // Guardar los cambios
+
+                // Devolver una respuesta exitosa
+                return ResponseHelper<Customer>.MakeResponseSuccess(customer, "Cliente eliminado con éxito");
+            }
+            catch (Exception ex)
+            {
+                // Devolver un error si ocurre alguna excepción
+                return ResponseHelper<Customer>.MakeResponseFail(ex, "Error al eliminar el cliente");
+            }
+        }
     }
 }

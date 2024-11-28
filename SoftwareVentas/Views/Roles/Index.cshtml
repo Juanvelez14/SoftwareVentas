@@ -72,15 +72,15 @@
                                 {
                                     @if (await _usersService.CurrenUserIsAuthorizedAsync("updateRoles", "Roles"))
                                     {
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill"></i></a>
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil-fill">Editar</i></a>
                                     }
 
-                                    @if (await _usersService.CurrenUserIsAuthorizedAsync("deleteRoles", "Roles"))
+                                    @*@if (await _usersService.CurrenUserIsAuthorizedAsync("deleteRoles", "Roles"))
                                     {
                                         <form asp-action="Delete" asp-route-id="@item.Id" style="display:contents">
                                             <button class="btn btn-danger btn-sm btnDelete"><i class="bi bi-trash-fill"></i></button>
                                         </form>
-                                    }
+                                    }*@
                                 }
                             </td>
 

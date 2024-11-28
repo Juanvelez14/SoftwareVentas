@@ -339,6 +339,10 @@ namespace SoftwareVentas.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("EmployeeId");
+
                     b.ToTable("Sales");
                 });
 
@@ -509,6 +513,25 @@ namespace SoftwareVentas.Migrations
                     b.Navigation("Permission");
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("SoftwareVentas.Data.Entities.Sale", b =>
+                {
+                    b.HasOne("SoftwareVentas.Data.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SoftwareVentas.Data.Entities.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Employee");
                 });
 
             modelBuilder.Entity("SoftwareVentas.Data.Entities.User", b =>

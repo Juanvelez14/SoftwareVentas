@@ -1,5 +1,6 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using SoftwareVentas.BLL;
 using SoftwareVentas.Core;
 using SoftwareVentas.Core.Atributtes;
 using SoftwareVentas.Core.Pagination;
@@ -154,30 +155,22 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-        // Acción para eliminar una venta
-        [HttpPost]
+        [HttpGet]
         [CustomAuthorize(permission: "deleteSales", module: "Sales")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            try
-            {
-                Core.Response<bool> response = await _saleService.DeleteAsync(id);
+            //Core.Response<Customer> response = await _customerService.GetOneAsync(id);
+            var response = await _saleService.DeleteAsync(id);
 
-                if (!response.IsSuccess)
-                {
-                    _notifyService.Error(response.Message);
-                }
-                else
-                {
-                    _notifyService.Success("Venta eliminada correctamente.");
-                }
-            }
-            catch (Exception ex)
+            if (response.IsSuccess)
             {
-                _notifyService.Error($"Ocurrió un error: {ex.Message}");
+                return RedirectToAction(nameof(Index));
             }
 
+            _notifyService.Error(response.Message);
             return RedirectToAction(nameof(Index));
         }
+
+       
     }
 }

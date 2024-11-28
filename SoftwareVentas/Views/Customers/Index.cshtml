@@ -21,6 +21,7 @@
     </div>
 </form>
 
+
 <table class="table table-bordered mt-3">
     <thead>
         <tr>
@@ -39,9 +40,13 @@
                 <td>@customer.mainPhone</td>
                 <td>
                     <a class="btn btn-warning" asp-action="Edit" asp-route-id="@customer.idCustomer">Edit</a>
-                    <form asp-action="Delete" asp-route-id="@customer.idCustomer" method="POST" style="display: contents;">
+
+                    <a class="btn btn-danger" asp-action="Delete" asp-route-id="@customer.idCustomer">Eliminar</a>
+
+                    @*<form asp-action="Delete" asp-route-id="@customer.idCustomer" method="POST" style="display: contents;">
                         <button class="btn btn-danger btnDelete">Eliminar</button>
-                    </form>
+                </form>*@
+
                 </td>
             </tr>
         }
@@ -133,7 +138,8 @@
                             confirmButtonColor: "#3085d6",
                             cancelButtonColor: "#d33",
                             confirmButtonText: "Si",
-                             cancelButtonText: "No, Cancelar"
+                            cancelButtonText:
+                            "No, Cancelar"
 
                         }).then((result) => {
 

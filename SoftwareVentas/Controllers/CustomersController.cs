@@ -1,5 +1,6 @@
 ﻿using AspNetCoreHero.ToastNotification.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SoftwareVentas.Core;
 using SoftwareVentas.Core.Atributtes;
 using SoftwareVentas.Core.Pagination;
@@ -125,6 +126,54 @@ namespace SoftwareVentas.Controllers
             {
                 _notifyService.Error(ex.Message);
                 return View(dto);
+            }
+        }
+
+        /// modifico codigo aca
+        /// 
+
+        [HttpGet]
+        [CustomAuthorize(permission: "DeleteCustomers", module: "Customers")]
+        public async Task<IActionResult> Delete([FromRoute] int id)
+        {
+            //Core.Response<Customer> response = await _customerService.GetOneAsync(id);
+            var response = await _customerService.DeleteAsync(id);
+
+            if (response.IsSuccess)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            _notifyService.Error(response.Message);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [CustomAuthorize(permission: "DeleteCustomers", module: "Customers")]
+        public async Task<IActionResult> Delete(CustomerDTO dto)
+        {
+            try
+            {
+
+                // Obtener el ID del DTO
+                var id = dto.idCustomer;
+
+                // Llamar al servicio para eliminar el cliente
+                var response = await _customerService.DeleteAsync(id);
+
+                if (!response.IsSuccess)
+                {
+                    _notifyService.Error(response.Message);  // Mostrar mensaje de error
+                    return RedirectToAction(nameof(Index));  // Redirigir a la vista de listado
+                }
+
+                _notifyService.Success(response.Message);  // Mostrar mensaje de éxito
+                return RedirectToAction(nameof(Index));  // Redirigir a la vista de listado
+            }
+            catch (Exception ex)
+            {
+                _notifyService.Error("Ocurrió un error al eliminar el cliente.");  // Mostrar mensaje de error general
+                return RedirectToAction(nameof(Index));  // Redirigir a la vista de listado en caso de error
             }
         }
     }

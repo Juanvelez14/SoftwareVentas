@@ -7,6 +7,7 @@ using SoftwareVentas.DTOs;
 using SoftwareVentas.Services;
 using SoftwareVentas.Helpers;
 using SoftwareVentas.Core.Atributtes;
+using SoftwareVentas.BLL;
 
 namespace SoftwareVentas.Controllers
 {
@@ -147,30 +148,22 @@ namespace SoftwareVentas.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet]
         [CustomAuthorize(permission: "deleteEmployees", module: "Employees")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            try
-            {
-                Core.Response<Employee> response = await _employeeService.DeleteAsync(id);
+            //Core.Response<Customer> response = await _customerService.GetOneAsync(id);
+            var response = await _employeeService.DeleteAsync(id);
 
-                if (!response.IsSuccess)
-
-                {
-                    _notifyService.Error(response.Message);
-                }
-                else
-                {
-                    _notifyService.Success("Empleado eliminado correctamente.");
-                }
-            }
-            catch (Exception ex)
+            if (response.IsSuccess)
             {
-                _notifyService.Error($"Ocurrió un error: {ex.Message}");
+                return RedirectToAction(nameof(Index));
             }
 
+            _notifyService.Error(response.Message);
             return RedirectToAction(nameof(Index));
         }
+
+        
     }
 }
